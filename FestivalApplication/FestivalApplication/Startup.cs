@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using FestivalApplication.Data;
 
 namespace FestivalApplication
 {
@@ -32,6 +34,9 @@ namespace FestivalApplication
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "FestivalApplication", Version = "v1" });
             });
+
+            services.AddDbContext<DBContext>(options =>
+                    options.UseMySQL(Configuration.GetConnectionString("DBContext")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,6 +54,13 @@ namespace FestivalApplication
             app.UseRouting();
 
             app.UseAuthorization();
+
+            //global cors policy
+            app.UseCors(x => x
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .SetIsOriginAllowed(origin => true) // allow any origin
+            .AllowCredentials()); // allow credentials
 
             app.UseEndpoints(endpoints =>
             {
