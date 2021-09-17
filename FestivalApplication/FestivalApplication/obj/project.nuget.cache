@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "9p0gI9hyIU60iV8nQrR7fsOUYP/TIBcuTYqHFPdSIGJzlPNsAglXTs3W97EFvEkN9I0vLrH76PPYItYB1nCXrg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\rgass\\Local Folder\\FestivalApp\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\rgass\\.nuget\\packages\\microsoft.extensions.apidescription.server\\3.0.0\\microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
+    "C:\\Users\\rgass\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
+    "C:\\Users\\rgass\\.nuget\\packages\\swashbuckle.aspnetcore\\5.6.3\\swashbuckle.aspnetcore.5.6.3.nupkg.sha512",
+    "C:\\Users\\rgass\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\5.6.3\\swashbuckle.aspnetcore.swagger.5.6.3.nupkg.sha512",
+    "C:\\Users\\rgass\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\5.6.3\\swashbuckle.aspnetcore.swaggergen.5.6.3.nupkg.sha512",
+    "C:\\Users\\rgass\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\5.6.3\\swashbuckle.aspnetcore.swaggerui.5.6.3.nupkg.sha512"
+  ],
+  "logs": []
+}
