@@ -15,5 +15,10 @@ namespace FestivalApplication.Data
         }
 
         public DbSet<FestivalApplication.Model.Message> Message { get; set; }
+
+        public DbSet<FestivalApplication.Model.UserActivity> UserActivity { get; set; }
+
+        public DbSet<FestivalApplication.Model.User> User { get; set; }
+
     }
 }

@@ -23,9 +23,6 @@ namespace FestivalApplication.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int?>("MessageAuthorUserID")
-                        .HasColumnType("int");
-
                     b.Property<string>("MessageText")
                         .HasColumnType("text");
 
@@ -36,8 +33,6 @@ namespace FestivalApplication.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("MessageID");
-
-                    b.HasIndex("MessageAuthorUserID");
 
                     b.HasIndex("UserActivityID");
 
@@ -50,8 +45,8 @@ namespace FestivalApplication.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
+                    b.Property<string>("Role")
+                        .HasColumnType("text");
 
                     b.Property<string>("UserName")
                         .HasColumnType("text");
@@ -70,7 +65,7 @@ namespace FestivalApplication.Migrations
                     b.Property<DateTime>("Entry")
                         .HasColumnType("datetime");
 
-                    b.Property<DateTime>("Exit")
+                    b.Property<DateTime?>("Exit")
                         .HasColumnType("datetime");
 
                     b.Property<int>("StageID")
@@ -88,15 +83,11 @@ namespace FestivalApplication.Migrations
 
             modelBuilder.Entity("FestivalApplication.Model.Message", b =>
                 {
-                    b.HasOne("FestivalApplication.Model.User", "MessageAuthor")
-                        .WithMany()
-                        .HasForeignKey("MessageAuthorUserID");
-
-                    b.HasOne("FestivalApplication.Model.UserActivity", null)
+                    b.HasOne("FestivalApplication.Model.UserActivity", "UserActivity")
                         .WithMany("MessageHistory")
                         .HasForeignKey("UserActivityID");
 
-                    b.Navigation("MessageAuthor");
+                    b.Navigation("UserActivity");
                 });
 
             modelBuilder.Entity("FestivalApplication.Model.UserActivity", b =>

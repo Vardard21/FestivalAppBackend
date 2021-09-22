@@ -17,7 +17,7 @@ namespace FestivalApplication.Controllers
         [HttpGet("{StageID}")]
         public string Get(int StageID)
         {
-            return "value";
+            return "OK";
         }
     }
 }

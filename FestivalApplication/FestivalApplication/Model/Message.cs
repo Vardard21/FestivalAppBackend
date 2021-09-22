@@ -10,6 +10,7 @@ namespace FestivalApplication.Model
         public int MessageID { get; set; }
         public string MessageText { get; set; }
         public DateTime Timestamp { get; set; }
-        public User MessageAuthor { get; set; }
+        public UserActivity UserActivity { get; set; }
     }
+
 }
