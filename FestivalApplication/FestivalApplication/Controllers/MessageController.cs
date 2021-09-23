@@ -27,10 +27,10 @@ namespace FestivalApplication.Controllers
         public List<MessageSendDto> GetMessage(ChatHistoryDto historyrequest)
         {
             //Validate LastUpdated date and set default to one hour ago
-            if(historyrequest.LastUpdated < DateTime.UtcNow.AddHours(-1))
-            {
-                historyrequest.LastUpdated = DateTime.UtcNow.AddHours(-1);
-            }
+            //if(historyrequest.LastUpdated < DateTime.UtcNow.AddHours(-1))
+            //{
+            //    historyrequest.LastUpdated = DateTime.UtcNow.AddHours(-1);
+            //}
 
             //Check for all messages posted in the stage since the last update date
             var MessageHistory = _context.Message.Where(x => x.Timestamp > historyrequest.LastUpdated).Where(x => x.UserActivity.StageID == historyrequest.StageID).Include(message => message.UserActivity).ToList();
@@ -60,8 +60,10 @@ namespace FestivalApplication.Controllers
         // POST: api/Message
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public string PostMessage(MessageReceiveDto messagedto)
+        public Response<string> PostMessage(MessageReceiveDto messagedto)
         {
+            Response<string> response = new Response<string>();
+
             //Create a new message to transfer the message data into
             Message message = new Message();
             //Find UserActivities currently active for the UserID
@@ -80,16 +82,21 @@ namespace FestivalApplication.Controllers
                 if(_context.SaveChanges() > 0)
                 {
                     //Message was saved correctly
-                    return "OK";
+                    response.Success = true;
+                    return response;
                 } else
                 {
                     //Message was not saved correctly
-                    return "FAILED";
+                    response.Success = false;
+                    response.ErrorMessage.Add(1);
+                    return response;
                 }
             } else
             {
                 //There was no active UserActivity for this user
-                return "FAILED";
+                response.Success = false;
+                response.ErrorMessage.Add(2);
+                return response;
             }
         }
     }
