@@ -1,9 +1,10 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using MySql.EntityFrameworkCore.Metadata;
 
 namespace FestivalApplication.Migrations
 {
-    public partial class InitialDBCreation : Migration
+    public partial class YanivMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,9 +13,9 @@ namespace FestivalApplication.Migrations
                 columns: table => new
                 {
                     UserID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    UserName = table.Column<string>(type: "text", nullable: true),
+                    Role = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -26,11 +27,11 @@ namespace FestivalApplication.Migrations
                 columns: table => new
                 {
                     UserActivityID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     UserID = table.Column<int>(type: "int", nullable: false),
                     StageID = table.Column<int>(type: "int", nullable: false),
-                    Entry = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Exit = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Entry = table.Column<DateTime>(type: "datetime", nullable: false),
+                    Exit = table.Column<DateTime>(type: "datetime", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -48,9 +49,9 @@ namespace FestivalApplication.Migrations
                 columns: table => new
                 {
                     MessageID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    MessageText = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    MessageText = table.Column<string>(type: "text", nullable: true),
+                    Timestamp = table.Column<DateTime>(type: "datetime", nullable: false),
                     UserActivityID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>

@@ -39,14 +39,14 @@ namespace FestivalApplication.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserActivityExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                //if (!UserActivityExists(id))
+                //{
+                //    return NotFound();
+                //}
+                //else
+                //{
+                //    throw;
+                //}
             }
 
             return NoContent();
