@@ -3,14 +3,21 @@ using System;
 using FestivalApplication.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FestivalApplication.Migrations
 {
     [DbContext(typeof(DBContext))]
-    partial class DBContextModelSnapshot : ModelSnapshot
+<<<<<<< HEAD:FestivalApplication/FestivalApplication/Migrations/20210923125721_YanivMigration.Designer.cs
+    [Migration("20210923125721_YanivMigration")]
+    partial class YanivMigration
+=======
+    [Migration("20210924075819_InitialDBCreation")]
+    partial class InitialDBCreation
+>>>>>>> master:FestivalApplication/FestivalApplication/Migrations/20210924075819_InitialDBCreation.Designer.cs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,9 +69,6 @@ namespace FestivalApplication.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("PassWord")
-                        .HasColumnType("text");
-
                     b.Property<string>("Role")
                         .HasColumnType("text");
 
@@ -96,8 +100,6 @@ namespace FestivalApplication.Migrations
 
                     b.HasKey("UserActivityID");
 
-                    b.HasIndex("StageID");
-
                     b.HasIndex("UserID");
 
                     b.ToTable("UserActivity");
@@ -114,22 +116,11 @@ namespace FestivalApplication.Migrations
 
             modelBuilder.Entity("FestivalApplication.Model.UserActivity", b =>
                 {
-                    b.HasOne("FestivalApplication.Model.Stage", null)
-                        .WithMany("Log")
-                        .HasForeignKey("StageID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("FestivalApplication.Model.User", null)
                         .WithMany("Log")
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("FestivalApplication.Model.Stage", b =>
-                {
-                    b.Navigation("Log");
                 });
 
             modelBuilder.Entity("FestivalApplication.Model.User", b =>

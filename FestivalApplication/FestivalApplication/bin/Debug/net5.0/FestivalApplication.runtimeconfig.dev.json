@@ -1,8 +1,8 @@
 {
   "runtimeOptions": {
     "additionalProbingPaths": [
-      "C:\\Users\\rgass\\.dotnet\\store\\|arch|\\|tfm|",
-      "C:\\Users\\rgass\\.nuget\\packages"
+      "C:\\Users\\yaniv\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\yaniv\\.nuget\\packages"
     ]
   }
 }

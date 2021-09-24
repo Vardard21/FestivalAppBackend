@@ -9,8 +9,18 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FestivalApplication.Migrations
 {
     [DbContext(typeof(DBContext))]
+<<<<<<< HEAD:FestivalApplication/FestivalApplication/Migrations/20210924104610_Initial.Designer.cs
     [Migration("20210924104610_Initial")]
     partial class Initial
+=======
+<<<<<<< HEAD:FestivalApplication/FestivalApplication/Migrations/20210923125721_YanivMigration.Designer.cs
+    [Migration("20210923125721_YanivMigration")]
+    partial class YanivMigration
+=======
+    [Migration("20210924075819_InitialDBCreation")]
+    partial class InitialDBCreation
+>>>>>>> master:FestivalApplication/FestivalApplication/Migrations/20210924075819_InitialDBCreation.Designer.cs
+>>>>>>> 24e6d73fb464172549da2770604af689f82cde56:FestivalApplication/FestivalApplication/Migrations/20210924075819_InitialDBCreation.Designer.cs
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

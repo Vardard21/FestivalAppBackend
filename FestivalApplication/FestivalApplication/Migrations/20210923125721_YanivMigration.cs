@@ -4,11 +4,7 @@ using MySql.EntityFrameworkCore.Metadata;
 
 namespace FestivalApplication.Migrations
 {
-<<<<<<< HEAD:FestivalApplication/FestivalApplication/Migrations/20210924104610_Initial.cs
-    public partial class Initial : Migration
-=======
     public partial class YanivMigration : Migration
->>>>>>> 24e6d73fb464172549da2770604af689f82cde56:FestivalApplication/FestivalApplication/Migrations/20210924075819_InitialDBCreation.cs
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -33,7 +29,6 @@ namespace FestivalApplication.Migrations
                     UserID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     UserName = table.Column<string>(type: "text", nullable: true),
-                    PassWord = table.Column<string>(type: "text", nullable: true),
                     Role = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
