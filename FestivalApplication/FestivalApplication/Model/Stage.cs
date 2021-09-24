@@ -13,4 +13,5 @@ namespace FestivalApplication.Model
         //public List<UserActivity> Log { get; set; }
         //public List<MusicListActivity> PlayList { get; set; }
     }
+   
 }
