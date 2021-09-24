@@ -14,5 +14,17 @@ namespace FestivalApplication.Model
         public DateTime Entry { get; set; }
         public DateTime? Exit { get; set; }
         //public List<Message> MessageHistory { get; set; }
+
+        public UserActivity()
+        {
+
+        }
+
+        public UserActivity(int _StageID, int _UserID)
+        {
+            UserID = _UserID;
+            StageID = _StageID;
+            Entry = DateTime.UtcNow;
+        }
     }
 }
