@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FestivalApplication.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20210924075819_InitialDBCreation")]
-    partial class InitialDBCreation
+    [Migration("20210924104610_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -63,6 +63,9 @@ namespace FestivalApplication.Migrations
                     b.Property<int>("UserID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    b.Property<string>("PassWord")
+                        .HasColumnType("text");
 
                     b.Property<string>("Role")
                         .HasColumnType("text");

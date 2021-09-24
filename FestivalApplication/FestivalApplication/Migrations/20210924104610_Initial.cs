@@ -4,7 +4,7 @@ using MySql.EntityFrameworkCore.Metadata;
 
 namespace FestivalApplication.Migrations
 {
-    public partial class InitialDBCreation : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -29,6 +29,7 @@ namespace FestivalApplication.Migrations
                     UserID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     UserName = table.Column<string>(type: "text", nullable: true),
+                    PassWord = table.Column<string>(type: "text", nullable: true),
                     Role = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
