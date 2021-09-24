@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using MySql.EntityFrameworkCore.Metadata;
 
 namespace FestivalApplication.Migrations
 {
@@ -8,13 +9,27 @@ namespace FestivalApplication.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Stage",
+                columns: table => new
+                {
+                    StageID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    StageName = table.Column<string>(type: "text", nullable: true),
+                    StageActive = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Stage", x => x.StageID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "User",
                 columns: table => new
                 {
                     UserID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    UserName = table.Column<string>(type: "text", nullable: true),
+                    Role = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -26,11 +41,11 @@ namespace FestivalApplication.Migrations
                 columns: table => new
                 {
                     UserActivityID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     UserID = table.Column<int>(type: "int", nullable: false),
                     StageID = table.Column<int>(type: "int", nullable: false),
-                    Entry = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Exit = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Entry = table.Column<DateTime>(type: "datetime", nullable: false),
+                    Exit = table.Column<DateTime>(type: "datetime", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -48,9 +63,9 @@ namespace FestivalApplication.Migrations
                 columns: table => new
                 {
                     MessageID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    MessageText = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    MessageText = table.Column<string>(type: "text", nullable: true),
+                    Timestamp = table.Column<DateTime>(type: "datetime", nullable: false),
                     UserActivityID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -79,6 +94,9 @@ namespace FestivalApplication.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Message");
+
+            migrationBuilder.DropTable(
+                name: "Stage");
 
             migrationBuilder.DropTable(
                 name: "UserActivity");

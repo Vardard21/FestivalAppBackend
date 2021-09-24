@@ -24,16 +24,17 @@ namespace FestivalApplication.Controllers
 
         // GET: api/Message
         [HttpPut]
-        public List<MessageSendDto> GetMessage(ChatHistoryDto historyrequest)
+        public Response<List<MessageSendDto>> GetMessage(ChatHistoryDto historyrequest)
         {
+            Response<List<MessageSendDto>> response = new Response<List<MessageSendDto>>();
             //Validate LastUpdated date and set default to one hour ago
-            //if(historyrequest.LastUpdated < DateTime.UtcNow.AddHours(-1))
+            //if (historyrequest.LastUpdated < DateTime.UtcNow.AddHours(-1))
             //{
             //    historyrequest.LastUpdated = DateTime.UtcNow.AddHours(-1);
             //}
 
             //Check for all messages posted in the stage since the last update date
-            var MessageHistory = _context.Message.Where(x => x.Timestamp > historyrequest.LastUpdated).Where(x => x.UserActivity.StageID == historyrequest.StageID).Include(message => message.UserActivity).ToList();
+            var MessageHistory = _context.Message.Where(x => x.Timestamp > historyrequest.LastUpdated && x.UserActivity.StageID == historyrequest.StageID).Include(message => message.UserActivity).ToList();
 
             //Initialize the return list
             List<MessageSendDto> ChatHistory = new List<MessageSendDto>();
@@ -54,7 +55,9 @@ namespace FestivalApplication.Controllers
             }
 
             //Return the Dto list
-            return ChatHistory;
+            response.Success = true;
+            response.Data = ChatHistory;
+            return response;
         }
 
         // POST: api/Message
@@ -62,12 +65,13 @@ namespace FestivalApplication.Controllers
         [HttpPost]
         public Response<string> PostMessage(MessageReceiveDto messagedto)
         {
+            //Create a new response with type string
             Response<string> response = new Response<string>();
 
             //Create a new message to transfer the message data into
             Message message = new Message();
             //Find UserActivities currently active for the UserID
-            var activitiesfound = _context.UserActivity.Where(x => x.UserID == messagedto.UserID).Where(x => x.Exit == default).ToList();
+            var activitiesfound = _context.UserActivity.Where(x => x.UserID == messagedto.UserID && x.Exit == default).ToList();
 
             //Check if the user is currently active in an activity
             if(activitiesfound.Count() == 1)
@@ -95,7 +99,7 @@ namespace FestivalApplication.Controllers
             {
                 //There was no active UserActivity for this user
                 response.Success = false;
-                response.ErrorMessage.Add(2);
+                response.ErrorMessage.Add(3);
                 return response;
             }
         }
