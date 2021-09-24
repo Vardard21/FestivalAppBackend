@@ -38,27 +38,38 @@ namespace FestivalApplication.Controllers
             //create a list of active stages
             List<StagesRequestDto> ActiveStages = new List<StagesRequestDto>();
 
-            //create a for loop for each stage in stage status
-            foreach (Stage stage in stagesstatus)
+            if(!ActiveStages.Any())
             {
-                //Create a new Stage Request DTO and fill the id and name
-                StagesRequestDto dto = new StagesRequestDto();
-                dto.StageID = stage.StageID;
-                dto.StageName = stage.StageName;
-                //Find the Current Song, temporarily only manually defined
-                dto.CurrentSong = "Thunderstruck by AC/DC";
-                ////Find the amount of active users in the stage
-                dto.NumberOfUsers = _context.UserActivity
-                    .Where(x => x.StageID == stage.StageID)
-                    .Where(x => x.Exit == default)
-                    .Count();
-                //Add the new object to the return list
-                ActiveStages.Add(dto);
-            }
 
-            response.Success = true;
-            response.Data = ActiveStages;
-            return response;
+                //create a for loop for each stage in stage status
+                foreach (Stage stage in stagesstatus)
+                {
+                    //Create a new Stage Request DTO and fill the id and name
+                    StagesRequestDto dto = new StagesRequestDto();
+                    dto.StageID = stage.StageID;
+                    dto.StageName = stage.StageName;
+                    //Find the Current Song, temporarily only manually defined
+                    dto.CurrentSong = "Thunderstruck by AC/DC";
+                    ////Find the amount of active users in the stage
+                    dto.NumberOfUsers = _context.UserActivity
+                        .Where(x => x.StageID == stage.StageID)
+                        .Where(x => x.Exit == default)
+                        .Count();
+                    //Add the new object to the return list
+                    ActiveStages.Add(dto);
+                }
+
+                response.Success = true;
+                response.Data = ActiveStages;
+                return response;
+            }
+            else
+            {
+                response.Success = false;
+                response.Data = ActiveStages;
+                response.ErrorMessage.Add(1);
+                return response;
+            }
         }
 
         
