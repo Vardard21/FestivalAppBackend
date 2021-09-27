@@ -3,3 +3,4 @@
 ################################################################################
 
 /FestivalApplication/FestivalApplication/Migrations/DBContextModelSnapshot.cs
+*.cs
