@@ -288,3 +288,6 @@ C:\Users\yaniv\Source\Repos\FestivalAppBackend\FestivalApplication\FestivalAppli
 C:\Users\yaniv\Source\Repos\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Debug\net5.0\FestivalApplication.RazorTargetAssemblyInfo.cache
 C:\Users\yaniv\Source\Repos\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Debug\net5.0\FestivalApplication.csproj.CopyComplete
 C:\Users\yaniv\Source\Repos\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Debug\net5.0\FestivalApplication.genruntimeconfig.cache
+C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\Microsoft.AspNetCore.JsonPatch.dll
+C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
+C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\Newtonsoft.Json.Bson.dll

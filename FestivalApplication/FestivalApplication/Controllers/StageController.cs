@@ -9,6 +9,8 @@ using FestivalApplication.Data;
 using FestivalApplication.Model;
 using FestivalApplication.Model.DataTransferObjects;
 
+
+
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace FestivalApplication.Controllers
@@ -39,7 +41,7 @@ namespace FestivalApplication.Controllers
             //create a list of active stages
             List<StagesRequestDto> ActiveStages = new List<StagesRequestDto>();
 
-            if(!ActiveStages.Any())
+            if (!ActiveStages.Any())
             {
 
                 //create a for loop for each stage in stage status
@@ -88,7 +90,7 @@ namespace FestivalApplication.Controllers
             var stagefound = _context.Stage.Where(x => x.StageName == stagecreatedto.StageName).ToList();
 
 
-            if (stagefound.Count()==1 )
+            if (stagefound.Count() == 1)
             {
 
                 response.Success = false;
@@ -117,46 +119,66 @@ namespace FestivalApplication.Controllers
                 }
             }
         }
-        [HttpPut("{id}")]
-        public Response<string> UpdateStage(int id, StageUpdateDto stageUpdatedto)
+        // PUT: api/StagesController2/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut]
+        public Response<string> PutUser(StageUpdateDto changestage)
         {
-
-                //creates a response variable to be sent
-                Response<string> response = new Response<string>();
-
-
-                    if (_context.Stage.Where(x => x.StageID == stageUpdatedto.StageID).ToList()==default)
+            //Create a new response
+            Response<string> response = new Response<string>();
+            try
+            {
+                //Check if the stageID exists
+                if ((_context.Stage.Any(x => x.StageID == changestage.StageID)))
+                    
+                {
+                    //Check if the state is actually different
+                    if (!_context.Stage.Any(x => x.StageActive == changestage.StageActive))
                     {
+                        //Stage is already at that state
                         response.Success = false;
                         response.ErrorMessage.Add(2);
+                        response.Data = "Stage is already in that state";
                         return response;
                     }
-                  
+                    //Change the state
+                    Stage stage = _context.Stage.Find(changestage.StageID);
+                    stage.StageActive = changestage.StageActive;
+                    _context.Entry(stage).State = EntityState.Modified;
 
-                    //create a new stage to be inserted in DB
-                    Stage newStage = new Stage();
-
-                    //check if the new stage has name of an existing stage
-                        newStage.StageActive = stageUpdatedto.StageActive;
-                         _context.Stage.Append(newStage);
-
-                        if (_context.SaveChanges() > 0)
-                            {
-                                //Message was saved correctly
-                                response.Success = true;
-                                return response;
-                            }
-                            else
-                            {
-                                //Message was not saved correctly
-                                response.Success = false;
-                                response.ErrorMessage.Add(1);
-                                response.Data= "Failed to save Data" ;
-                                return response;
-
-                            }
+                    //Save the changes
+                    if (_context.SaveChanges() > 0)
+                    {
+                        //Stage was updated succesfully
+                        response.Success = true;
+                        return response;
                     }
-                
+                    else
+                    {
+                        //stage was not updated succesfully
+                        response.Success = false;
+                        response.ErrorMessage.Add(1);
+                        response.Data = "State has not been updated";
+                        return response;
+                    }
+                }
+                else
+                {
+                    //Stage does not exist
+                    response.Success = false;
+                    response.ErrorMessage.Add(2);
+                    response.Data = "Stage does not exist";
+                    return response;
+                }
+            }
+            catch
+            {
+                response.Success = false;
+                response.ErrorMessage.Add(1);
+                return response;
+            }
+        }
     }
+    
 }
 
