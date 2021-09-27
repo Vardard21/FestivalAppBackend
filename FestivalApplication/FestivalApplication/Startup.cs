@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using FestivalApplication.Data;
+using FestivalApplication.Model;
 
 namespace FestivalApplication
 {

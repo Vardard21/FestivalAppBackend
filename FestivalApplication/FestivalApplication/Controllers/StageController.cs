@@ -221,7 +221,7 @@ namespace FestivalApplication.Controllers
                     
                 {
                     //Check if the state is actually different
-                    if (!_context.Stage.Any(x => x.StageActive == changestage.StageActive && x.StageID == changestage.StageID)))
+                    if (_context.Stage.Any(x => x.StageActive == changestage.StageActive && x.StageID==changestage.StageID))
                     {
                         //Stage is already at that state
                         response.Success = false;
