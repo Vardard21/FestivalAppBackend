@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FestivalApplication.Data;
 using FestivalApplication.Model;
+using FestivalApplication.Model.DataTransferObjects;
 
 namespace FestivalApplication.Controllers
 {
@@ -21,88 +22,60 @@ namespace FestivalApplication.Controllers
             _context = context;
         }
 
-        // GET: api/StagesController2
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Stage>>> GetStage()
+        // GET: api/<StageController2>
+        [HttpGet("id")]
+        public Response<List<StageUsersDto>> GetStageUsers(int id)
         {
-            return await _context.Stage.ToListAsync();
-        }
+            //creates a response variable to be sent
+            Response<List<StageUsersDto>> response = new Response<List<StageUsersDto>>();
 
-        // GET: api/StagesController2/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Stage>> GetStage(int id)
-        {
-            var stage = await _context.Stage.FindAsync(id);
-
-            if (stage == null)
+            //checks if stage exists
+            if(!_context.Stage.Any(x=>x.StageID==id))
             {
-                return NotFound();
+                //Stage does not exist
+                response.Success = false;
+                response.ErrorMessage.Add(2);
+                return response;
             }
 
-            return stage;
-        }
+            //create a stages variable to be checked
+            var stageusers = _context.UserActivity
+                .Where(x => x.StageID == id && x.Exit==default)
+                .ToList();
 
-        // PUT: api/StagesController2/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutStage(int id, Stage stage)
-        {
-            if (id != stage.StageID)
-            {
-                return BadRequest();
-            }
+            List<StageUsersDto> ActiveUsers = new List<StageUsersDto>();
 
-            _context.Entry(stage).State = EntityState.Modified;
+            if (!ActiveUsers.Any())
+            {
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!StageExists(id))
+                //create a for loop for each stage in stage status
+                foreach (UserActivity useractivity in stageusers)
                 {
-                    return NotFound();
+                    //Create a new Stage Request DTO and fill the id and name
+                    StageUsersDto dto = new StageUsersDto();
+                    User user = _context.User.Find(useractivity.UserID);
+                    dto.UserID = user.UserID;
+                    dto.UserName = user.UserName;
+                    dto.UserRole = user.Role;
+
+
+                    //Add the new object to the return list
+                    ActiveUsers.Add(dto);
                 }
-                else
-                {
-                    throw;
-                }
+
+                response.Success = true;
+                response.Data = ActiveUsers;
+                return response;
             }
-
-            return NoContent();
-        }
-
-        // POST: api/StagesController2
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Stage>> PostStage(Stage stage)
-        {
-            _context.Stage.Add(stage);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetStage", new { id = stage.StageID }, stage);
-        }
-
-        // DELETE: api/StagesController2/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStage(int id)
-        {
-            var stage = await _context.Stage.FindAsync(id);
-            if (stage == null)
+            else
             {
-                return NotFound();
+                response.Success = false;
+                response.Data = ActiveUsers;
+                response.ErrorMessage.Add(1);
+                return response;
             }
-
-            _context.Stage.Remove(stage);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
-        private bool StageExists(int id)
-        {
-            return _context.Stage.Any(e => e.StageID == id);
-        }
+       
     }
 }
