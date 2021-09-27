@@ -94,6 +94,7 @@ namespace FestivalApplication.Controllers
             {
 
                 response.Success = false;
+                response.Data = "Stage with the same name already exists";
                 response.ErrorMessage.Add(3);
                 return response;
 
@@ -114,6 +115,7 @@ namespace FestivalApplication.Controllers
                 {
                     //Message was not saved correctly
                     response.Success = false;
+                    response.Data = "Error while saving stage";
                     response.ErrorMessage.Add(1);
                     return response;
                 }
