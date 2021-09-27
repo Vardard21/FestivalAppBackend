@@ -40,12 +40,8 @@ namespace FestivalApplication.Controllers
                     //Get User Information details
                     User user = _context.User.Where(x => x.UserName == logindetails.UserName).FirstOrDefault();
 
-                    //Check for existing AuthenticationKeys
-                    if (_context.Authentication.Any(x => x.User.UserID == user.UserID))
-                    {
-                        //Delete Existing Keys for this user
-                        _context.Authentication.Remove(_context.Authentication.Where(x => x.User.UserID == user.UserID).FirstOrDefault());
-                    }
+                    //Delete any existing keys and close off any open activities
+                    CloseOffAllUserActivities(user.UserID);
 
                     //Generate a new entry for the authentication table
                     Authentication auth = new Authentication();
@@ -73,23 +69,20 @@ namespace FestivalApplication.Controllers
                     else
                     {
                         //Authkey was not saved correctly
-                        response.Success = false;
-                        response.ErrorMessage.Add(1);
+                        response.ServerError();
                         return response;
                     }
                 }
                 else
                 {
                     //Combination is incorrect
-                    response.Success = false;
-                    response.ErrorMessage.Add(4);
+                    response.InvalidData();
                     return response;
                 }
             }
             catch
             {
-                response.Success = false;
-                response.ErrorMessage.Add(1);
+                response.ServerError();
                 return response;
             }
         }
@@ -105,36 +98,28 @@ namespace FestivalApplication.Controllers
             {
                 //Check for existing authkeys
                 if (_context.Authentication.Any(x => x.User.UserID == userid))
-                {
-                    //Delete the key
-                    _context.Authentication.Remove(_context.Authentication.Where(x => x.User.UserID == userid).FirstOrDefault());
-
-                    //Save changes
-                    if (_context.SaveChanges() > 0)
                     {
-                        //Key was removed correctly
-                        response.Success = true;
-                        return response;
+                        if (CloseOffAllUserActivities(userid))
+                        {
+                            response.Success = true;
+                            return response;
+                        }
+                        else
+                        {
+                            response.ServerError();
+                            return response;
+                        }
                     }
                     else
                     {
-                        //Key was not removed correctly
-                        response.Success = false;
-                        response.ErrorMessage.Add(1);
-                        return response;
-                    }
-                } else
-                {
-                    //No keys were found
-                    response.Success = false;
-                    response.ErrorMessage.Add(3);
+                        //No keys were found
+                        response.InvalidOperation();
                     return response;
                 }
             }
             catch
             {
-                response.Success = false;
-                response.ErrorMessage.Add(1);
+                response.ServerError();
                 return response;
             }
         }
@@ -159,16 +144,44 @@ namespace FestivalApplication.Controllers
             return result.ToString();
         }
 
-        //AuthenticateKey auth = new AuthenticateKey();
-        //        if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
-        //        {
-        //        }
-        //        else
-        //        {
-        //            response.Success = false;
-        //            response.ErrorMessage.Add(5);
-        //            return response;
-        //        }
+        private Boolean CloseOffAllUserActivities(int userid)
+        {
+            //Delete the any authenticationkeys
+            _context.Authentication.RemoveRange(_context.Authentication.Where(x => x.User.UserID == userid).ToList());
 
-}
+            //Check for open UserActivities
+            var activities = _context.UserActivity.Where(x => x.UserID == userid && x.Exit == default).ToList();
+            if (activities.Count() > 0)
+            {
+                //Close UserActivities
+                foreach (UserActivity activity in activities)
+                {
+                    activity.Exit = DateTime.UtcNow;
+                }
+                _context.Entry(activities).State = EntityState.Modified;
+            }
+
+            //Save changes
+            if (_context.SaveChanges() > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        //AuthenticateKey auth = new AuthenticateKey();
+        //if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+        //{
+        //}
+        //else
+        //{
+        //    response.Success = false;
+        //    response.ErrorMessage.Add(5);
+        //    return response;
+        //}
+
+    }
 }
