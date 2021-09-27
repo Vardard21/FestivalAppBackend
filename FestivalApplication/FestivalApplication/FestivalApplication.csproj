@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Migrations\20210927125824_Gepulled.cs" />
-    <Compile Include="Migrations\20210927125824_Gepulled.Designer.cs" />
+    <Compile Include="Migrations\20210927111644_InitialDBCreation.cs" />
+    <Compile Include="Migrations\20210927111644_InitialDBCreation.Designer.cs" />
     <Compile Include="Migrations\DBContextModelSnapshot.cs" />
   </ItemGroup>
 

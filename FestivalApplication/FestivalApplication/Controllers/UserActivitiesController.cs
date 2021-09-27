@@ -39,16 +39,14 @@ namespace FestivalApplication.Controllers
                     {
                         if (_context.Stage.Where(x => x.StageID == userActivity.StageID && x.StageActive == true).ToList().Count() != 1)
                         {
-                            response.Success = false;
-                            response.ErrorMessage.Add(3);
+                            response.InvalidOperation();
                             return response;
                         }
                     }
                     //Validate that the UserID exists
                     if (_context.User.Where(x => x.UserID == userActivity.UserID).ToList().Count() != 1)
                     {
-                        response.Success = false;
-                        response.ErrorMessage.Add(3);
+                        response.InvalidData();
                         return response;
                     }
 
@@ -65,15 +63,14 @@ namespace FestivalApplication.Controllers
                         }
                         else
                         {
-                            response.Success = false;
-                            response.ErrorMessage.Add(3);
+                            response.InvalidOperation();
                             return response;
                         }
                     }
                     else
                     {
                         //Create a new UserActivity for this UserID and StageID
-                        UserActivity activity = new UserActivity(userActivity.UserID, userActivity.StageID);
+                        UserActivity activity = new UserActivity(userActivity.StageID, userActivity.UserID);
                         _context.UserActivity.Add(activity);
                     }
 
@@ -87,22 +84,19 @@ namespace FestivalApplication.Controllers
                     else
                     {
                         //Message was not saved correctly
-                        response.Success = false;
-                        response.ErrorMessage.Add(1);
+                        response.ServerError();
                         return response;
                     }
                 }
                 else
                 {
-                    response.Success = false;
-                    response.ErrorMessage.Add(5);
+                    response.AuthorizationError();
                     return response;
                 }
             }
             catch
             {
-                response.Success = false;
-                response.ErrorMessage.Add(1);
+                response.ServerError();
                 return response;
             }
         }
