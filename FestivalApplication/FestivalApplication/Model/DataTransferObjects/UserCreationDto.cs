@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FestivalApplication.Model
+namespace FestivalApplication.Model.DataTransferObjects
 {
-    public class User
+    public class UserCreationDto
     {
-        public int UserID { get; set; }
         public string UserName { get; set; }
         public string PassWord { get; set; }
-        public string Role { get; set; }
-        public List<UserActivity> Log { get; set; }
     }
 }
