@@ -7,6 +7,7 @@ namespace FestivalApplication.Model
 {
     public class TrackActivity
     {
+        public int ID { get; set; }
         public int ListID { get; set; }
         public int TrackID { get; set; }
         public DateTime Start { get; set; }

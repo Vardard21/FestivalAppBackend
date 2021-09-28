@@ -71,16 +71,13 @@ namespace FestivalApplication.Controllers
                 }
                 else
                 {
-                    response.Success = false;
-                    response.Data = ActiveStages;
-                    response.ErrorMessage.Add(1);
+                    response.Success = true;
                     return response;
                 }
             }
             catch
             {
-                response.Success = false;
-                response.ErrorMessage.Add(1);
+                response.ServerError();
                 return response;
             }
         }
@@ -101,8 +98,7 @@ namespace FestivalApplication.Controllers
                 if (!_context.Stage.Any(x => x.StageID == id))
                 {
                     //Stage does not exist
-                    response.Success = false;
-                    response.ErrorMessage.Add(2);
+                    response.InvalidData();
                     return response;
                 }
 
@@ -116,7 +112,6 @@ namespace FestivalApplication.Controllers
 
                 if (!ActiveUsers.Any())
                 {
-
                     //create a for loop for each stage in stage status
                     foreach (UserActivity useractivity in stageusers)
                     {
@@ -138,16 +133,13 @@ namespace FestivalApplication.Controllers
                 }
                 else
                 {
-                    response.Success = false;
-                    response.Data = ActiveUsers;
-                    response.ErrorMessage.Add(1);
+                    response.ServerError();
                     return response;
                 }
             }
             catch
             {
-                response.Success = false;
-                response.ErrorMessage.Add(1);
+                response.ServerError();
                 return response;
             }
         }
@@ -171,10 +163,8 @@ namespace FestivalApplication.Controllers
 
                 if (stagefound.Count() == 1)
                 {
-
-                    response.Success = false;
+                    response.InvalidOperation();
                     response.Data = "Stage with the same name already exists";
-                    response.ErrorMessage.Add(3);
                     return response;
 
                 }
@@ -193,17 +183,15 @@ namespace FestivalApplication.Controllers
                     else
                     {
                         //Message was not saved correctly
-                        response.Success = false;
+                        response.ServerError();
                         response.Data = "Error while saving stage";
-                        response.ErrorMessage.Add(1);
                         return response;
                     }
                 }
             }
             catch
             {
-                response.Success = false;
-                response.ErrorMessage.Add(1);
+                response.ServerError();
                 return response;
             }
         }
@@ -224,8 +212,7 @@ namespace FestivalApplication.Controllers
                     if (_context.Stage.Any(x => x.StageActive == changestage.StageActive && x.StageID==changestage.StageID))
                     {
                         //Stage is already at that state
-                        response.Success = false;
-                        response.ErrorMessage.Add(2);
+                        response.InvalidData();
                         response.Data = "Stage is already in that state";
                         return response;
                     }
@@ -244,8 +231,7 @@ namespace FestivalApplication.Controllers
                     else
                     {
                         //stage was not updated succesfully
-                        response.Success = false;
-                        response.ErrorMessage.Add(1);
+                        response.ServerError();
                         response.Data = "State has not been updated";
                         return response;
                     }
@@ -253,16 +239,14 @@ namespace FestivalApplication.Controllers
                 else
                 {
                     //Stage does not exist
-                    response.Success = false;
-                    response.ErrorMessage.Add(2);
+                    response.InvalidData();
                     response.Data = "Stage does not exist";
                     return response;
                 }
             }
             catch
             {
-                response.Success = false;
-                response.ErrorMessage.Add(1);
+                response.ServerError();
                 return response;
             }
         }
