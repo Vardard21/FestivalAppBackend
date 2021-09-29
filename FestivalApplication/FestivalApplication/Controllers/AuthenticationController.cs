@@ -98,22 +98,22 @@ namespace FestivalApplication.Controllers
             {
                 //Check for existing authkeys
                 if (_context.Authentication.Any(x => x.User.UserID == userid))
+                {
+                    if (CloseOffAllUserActivities(userid))
                     {
-                        if (CloseOffAllUserActivities(userid))
-                        {
-                            response.Success = true;
-                            return response;
-                        }
-                        else
-                        {
-                            response.ServerError();
-                            return response;
-                        }
+                        response.Success = true;
+                        return response;
                     }
                     else
                     {
-                        //No keys were found
-                        response.InvalidOperation();
+                        response.ServerError();
+                        return response;
+                    }
+                }
+                else
+                {
+                    //No keys were found
+                    response.InvalidOperation();
                     return response;
                 }
             }
@@ -158,7 +158,6 @@ namespace FestivalApplication.Controllers
                 {
                     activity.Exit = DateTime.UtcNow;
                 }
-                _context.Entry(activities).State = EntityState.Modified;
             }
 
             //Save changes

@@ -24,7 +24,7 @@ namespace FestivalApplication.Model.DataTransferObjects
         public void InvalidOperation()
         {
             Success = false;
-            ErrorMessage.Add(2);
+            ErrorMessage.Add(3);
         }
         public void InvalidData()
         {
