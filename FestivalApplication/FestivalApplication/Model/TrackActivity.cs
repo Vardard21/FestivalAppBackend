@@ -10,7 +10,7 @@ namespace FestivalApplication.Model
         public int ID { get; set; }
         public int MusicListID { get; set; }
         public int TrackID { get; set; }
-        public int Order { get; set; }
+        public int OrderNumber { get; set; }
 
     }
 }
