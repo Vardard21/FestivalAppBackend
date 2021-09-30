@@ -11,7 +11,5 @@ namespace FestivalApplication.Model
         public string ListName { get; set; }
         public List<TrackActivity> MusicTracks { get; set; }
         public List<MusicListActivity> PlayList { get; set; }
-        public Boolean Playing { get; set; }
-        public int CurrentTrack { get; set; }
     }
 }

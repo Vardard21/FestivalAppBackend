@@ -85,7 +85,7 @@ namespace FestivalApplication.Controllers
      
 
         // GET: api/<StageController2>
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         public Response<List<StageUsersDto>> GetStageUsers(int id)
         {
             //creates a response variable to be sent
