@@ -2,6 +2,6 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/FestivalApplication/FestivalApplication/Migrations/DBContextModelSnapshot.cs
-/FestivalApplication/FestivalApplication/Migrations/20210927110253_added User Password.Designer.cs
-*.cs
+/FestivalApplication/FestivalApplication/Properties
+/FestivalApplication/FestivalApplication/obj
+/FestivalApplication/FestivalApplication/bin
