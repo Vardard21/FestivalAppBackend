@@ -1,8 +1,0 @@
-{
-  "runtimeOptions": {
-    "additionalProbingPaths": [
-      "C:\\Users\\rgass\\.dotnet\\store\\|arch|\\|tfm|",
-      "C:\\Users\\rgass\\.nuget\\packages"
-    ]
-  }
-}
