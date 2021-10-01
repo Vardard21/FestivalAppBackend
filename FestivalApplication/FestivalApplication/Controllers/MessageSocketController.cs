@@ -32,7 +32,6 @@ namespace WebSocketsTutorial.Controllers
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                _logger.Log(LogLevel.Information, "WebSocket connection established");
                 await Echo(webSocket);
             }
             else
@@ -43,41 +42,48 @@ namespace WebSocketsTutorial.Controllers
 
         private async Task Echo(WebSocket webSocket)
         {
+            //Create a buffer in which to store the incoming bytes
             var buffer = new byte[1024 * 4];
+            //Receive the incoming message and place the individual bytes into the buffer
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            _logger.Log(LogLevel.Information, "Message received from Client");
 
+            //Enter a while loop for as long as the connection is not closed
             while (!result.CloseStatus.HasValue)
             {
-                //var serverMsg = Encoding.UTF8.GetBytes($"Server: Hello. You said: {Encoding.UTF8.GetString(buffer)}");
-                //await webSocket.SendAsync(new ArraySegment<byte>(serverMsg, 0, serverMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
-                //_logger.Log(LogLevel.Information, "Message sent to Client");
-
+                //Receive the incoming message and place the individual bytes into the buffer
                 result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                //_logger.Log(LogLevel.Information, "Message received from Client");
+
+                //Try to process the message
                 try
                 {
-                   
+                    //Encode the array of bytes into a string, and convert the string into a messageReceiveDto object
                     string received = Encoding.UTF8.GetString(buffer);
                     MessageReceiveDto responseObject = JsonConvert.DeserializeObject<MessageReceiveDto>(received);
 
+                    //Process the message and handle the response
                     Response<string> response = processMessage(responseObject);
-
                     if (response != null)
                     {
+                        //Serialize the object and encode the object into an array of bytes
                         var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                        //Send the message back to the Frontend through the webSocket
                         await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
                     }
                 } catch (Exception exp)
                 {
+                    //Send back a response with the exception
                     Response<System.Exception> response = new Response<System.Exception>();
                     response.ServerError();
                     response.Data = exp;
+                    //Serialize the object and encode the object into an array of bytes
                     var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                    //Send the message back to the Frontend through the webSocket
                     await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
                 }
+                //Empty the buffer
                 buffer = new byte[1024 * 4];
             }
+            //Close the connection when requested
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
             _logger.Log(LogLevel.Information, "WebSocket connection closed");
         }
