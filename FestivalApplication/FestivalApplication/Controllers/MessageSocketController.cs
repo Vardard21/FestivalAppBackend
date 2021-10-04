@@ -92,7 +92,6 @@ namespace WebSocketsTutorial.Controllers
         {
             //Create a new response with type string
             Response<string> response = new Response<string>();
-
             try
             {
                 AuthenticateKey auth = new AuthenticateKey();
