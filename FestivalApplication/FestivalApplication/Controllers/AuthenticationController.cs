@@ -96,24 +96,33 @@ namespace FestivalApplication.Controllers
 
             try
             {
-                //Check for existing authkeys
-                if (_context.Authentication.Any(x => x.User.UserID == userid))
+                AuthenticateKey auth = new AuthenticateKey();
+                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    if (CloseOffAllUserActivities(userid))
+                    //Check for existing authkeys
+                    if (_context.Authentication.Any(x => x.User.UserID == userid))
                     {
-                        response.Success = true;
-                        return response;
+                        if (CloseOffAllUserActivities(userid))
+                        {
+                            response.Success = true;
+                            return response;
+                        }
+                        else
+                        {
+                            response.ServerError();
+                            return response;
+                        }
                     }
                     else
                     {
-                        response.ServerError();
+                        //No keys were found
+                        response.InvalidOperation();
                         return response;
                     }
                 }
                 else
                 {
-                    //No keys were found
-                    response.InvalidOperation();
+                    response.AuthorizationError();
                     return response;
                 }
             }
@@ -177,8 +186,7 @@ namespace FestivalApplication.Controllers
         //}
         //else
         //{
-        //    response.Success = false;
-        //    response.ErrorMessage.Add(5);
+        //    response.AuthorizationError();
         //    return response;
         //}
 

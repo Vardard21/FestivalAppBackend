@@ -66,15 +66,13 @@ namespace FestivalApplication.Controllers
                     return response;
                 } else
                 {
-                    response.Success = false;
-                    response.ErrorMessage.Add(5);
+                    response.AuthorizationError();
                     return response;
                 }
             }
             catch
             {
-                response.Success = false;
-                response.ErrorMessage.Add(1);
+                response.ServerError();
                 return response;
             }
         }
@@ -114,30 +112,26 @@ namespace FestivalApplication.Controllers
                         else
                         {
                             //Message was not saved correctly
-                            response.Success = false;
-                            response.ErrorMessage.Add(1);
+                            response.ServerError();
                             return response;
                         }
                     }
                     else
                     {
                         //There was no active UserActivity for this user
-                        response.Success = false;
-                        response.ErrorMessage.Add(3);
+                        response.InvalidOperation();
                         return response;
                     }
                 }
                 else
                 {
-                    response.Success = false;
-                    response.ErrorMessage.Add(5);
+                    response.AuthorizationError();
                     return response;
                 }
             }
             catch
             {
-                response.Success = false;
-                response.ErrorMessage.Add(1);
+                response.ServerError();
                 return response;
             }
         }

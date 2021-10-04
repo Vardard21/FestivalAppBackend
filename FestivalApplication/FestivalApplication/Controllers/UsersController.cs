@@ -33,6 +33,14 @@ namespace FestivalApplication.Controllers
                 AuthenticateKey auth = new AuthenticateKey();
                 if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
+                    //Validate that the requestor is an admin
+                    if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    {
+                        //User changing the role is not an admin
+                        response.InvalidOperation();
+                        return response;
+                    }
+
                     //Get a list of all users
                     var AllUsers = _context.User.ToList();
 
@@ -77,6 +85,14 @@ namespace FestivalApplication.Controllers
                 AuthenticateKey auth = new AuthenticateKey();
                 if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
+                    //Validate that the requestor is an admin
+                    if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    {
+                        //User changing the role is not an admin
+                        response.InvalidOperation();
+                        return response;
+                    }
+
                     //Validate that the user exists
                     if (!_context.User.Any(x => x.UserID == id))
                     {
@@ -191,8 +207,7 @@ namespace FestivalApplication.Controllers
                 }
                 else
                 {
-                    response.Success = false;
-                    response.ErrorMessage.Add(5);
+                    response.AuthorizationError();
                     return response;
                 }
             }
@@ -216,11 +231,10 @@ namespace FestivalApplication.Controllers
                     //Validate that the fields exist
                     if (user.PassWord != null && user.UserName != null)
                     {
-                        //Validate thatthe username does not exist
+                        //Validate that the username does not exist
                         if (_context.User.Any(x => x.UserName == user.UserName))
                         {
-                            response.Success = false;
-                            response.ErrorMessage.Add(2);
+                            response.InvalidData();
                             return response;
                         }
                         User NewUser = new User();

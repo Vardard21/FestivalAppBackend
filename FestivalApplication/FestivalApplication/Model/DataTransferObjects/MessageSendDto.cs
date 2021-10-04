@@ -7,6 +7,7 @@ namespace FestivalApplication.Model.DataTransferObjects
 {
     public class MessageSendDto
     {
+        public int MessageID { get; set; }
         public string MessageText { get; set; }
         public DateTime Timestamp { get; set; }
         public string UserName { get; set; }
