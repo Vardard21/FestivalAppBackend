@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 
 namespace FestivalApplication.Model.DataTransferObjects
 {
-    public class StageCreateDto
+    public class SocketTypeWriter<o>
     {
-        public int StageID { get; set; }
-        public string StageName { get; set; }
-        public bool StageActive { get; set; }
+        public string MessageType { get; set; }
+        public o Message { get; set; }
     }
 }

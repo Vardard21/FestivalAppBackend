@@ -1,8 +1,0 @@
-{
-  "runtimeOptions": {
-    "additionalProbingPaths": [
-      "C:\\Users\\yaniv\\.dotnet\\store\\|arch|\\|tfm|",
-      "C:\\Users\\yaniv\\.nuget\\packages"
-    ]
-  }
-}

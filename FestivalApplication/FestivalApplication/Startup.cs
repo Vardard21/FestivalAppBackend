@@ -50,6 +50,8 @@ namespace FestivalApplication
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FestivalApplication v1"));
             }
 
+            app.UseWebSockets();
+
             app.UseHttpsRedirection();
 
             app.UseRouting();
