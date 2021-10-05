@@ -290,3 +290,4 @@ C:\Users\yaniv\Source\Repos\FestivalAppBackend\FestivalApplication\FestivalAppli
 C:\Users\yaniv\Source\Repos\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Debug\net5.0\FestivalApplication.genruntimeconfig.cache
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\MySqlConnector.dll
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\Pomelo.EntityFrameworkCore.MySql.dll
+C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\appsettings.Production.json

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAALL8xhFYepkS9z2WAuY07dAAAAAACAAAAAAAQZgAAAAEAACAAAABi1da+JSdD2/1ANEI14c68698GmEvbqayva/RdVRYR6AAAAAAOgAAAAAIAACAAAABw4tcu/48rWEQj51+F3+el+2vfAI75V+JoIbExucLiioAAAACTXNvq6PyFG+wwyZJ9hoaGKBw6cpoirPfT/8ODnFLjEmXi/bEXNy2upg6s9JMBEPgZf0k/zZjH4Qm2flx/zxKtDGkYV1SYT4tETP9F3ApsfyvO8jCypG+gifV+Tiay9Jg/SoEl616946jjPyxztdp14j1zX2nErcYzKOY8nHxXW0AAAAB6eick4jI6ioFx5+ucYPjZOIoxNWe9FL7DvCWO+2C18ehoVhBkMqfoTOmT2I5RKFzFXxAYbs4PSvEYeAtB292L</EncryptedPassword>
+    <History>True|2021-10-01T07:57:44.3788006Z;False|2021-10-01T09:55:51.2674698+02:00;False|2021-10-01T09:53:28.2184196+02:00;True|2021-10-01T09:44:35.7257216+02:00;</History>
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="Azure">
+      <Value>server=festivalapp.mysql.database.azure.com%3buser id=Ciber625%3bpassword=Weekend!%40#%3bpersistsecurityinfo=True%3bdatabase=festival</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+</Project>
