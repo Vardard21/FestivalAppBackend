@@ -33,13 +33,13 @@ namespace FestivalApplication.Controllers
                 AuthenticateKey auth = new AuthenticateKey();
                 if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    //Validate that the requestor is an admin
-                    if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
-                    {
-                        //User changing the role is not an admin
-                        response.InvalidOperation();
-                        return response;
-                    }
+                    ////Validate that the requestor is an admin
+                    //if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    //{
+                    //    //User changing the role is not an admin
+                    //    response.InvalidOperation();
+                    //    return response;
+                    //}
 
                     //Get a list of all users
                     var AllUsers = _context.User.ToList();
@@ -85,13 +85,13 @@ namespace FestivalApplication.Controllers
                 AuthenticateKey auth = new AuthenticateKey();
                 if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    //Validate that the requestor is an admin
-                    if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
-                    {
-                        //User changing the role is not an admin
-                        response.InvalidOperation();
-                        return response;
-                    }
+                    ////Validate that the requestor is an admin
+                    //if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    //{
+                    //    //User changing the role is not an admin
+                    //    response.InvalidOperation();
+                    //    return response;
+                    //}
 
                     //Validate that the user exists
                     if (!_context.User.Any(x => x.UserID == id))
@@ -172,13 +172,13 @@ namespace FestivalApplication.Controllers
                             return response;
                         }
 
-                        //Validate that the user changing the role is an admin (through the authentication key)
-                        if(!_context.Authentication.Any(x=>x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
-                        {
-                            //User changing the role is not an admin
-                            response.InvalidOperation();
-                            return response;
-                        }
+                        ////Validate that the user changing the role is an admin (through the authentication key)
+                        //if(!_context.Authentication.Any(x=>x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                        //{
+                        //    //User changing the role is not an admin
+                        //    response.InvalidOperation();
+                        //    return response;
+                        //}
                         //Change the role
                         User user = _context.User.Find(changerequest.UserID);
                         user.Role = changerequest.UserRole;

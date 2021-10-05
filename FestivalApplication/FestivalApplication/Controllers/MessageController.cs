@@ -40,7 +40,7 @@ namespace FestivalApplication.Controllers
                     }
 
                     //Check for all messages posted in the stage since the last update date
-                    var MessageHistory = _context.Message.Where(x => x.Timestamp > historyrequest.LastUpdated && x.UserActivity.Stage.StageID == historyrequest.StageID).Include(message => message.UserActivity).ToList();
+                    var MessageHistory = _context.Message.Where(x => x.Timestamp > historyrequest.LastUpdated && x.UserActivity.Stage.StageID == historyrequest.StageID).Include(message => message.UserActivity.User).ToList();
 
                     //Initialize the return list
                     List<MessageSendDto> ChatHistory = new List<MessageSendDto>();
