@@ -42,8 +42,15 @@ namespace FestivalApplication.Controllers
 
         public async void RemoveSocket(WebSocket webSocket)
         {
-            await webSocket.CloseAsync( WebSocketCloseStatus.NormalClosure, "Closing the connection", CancellationToken.None);
-            ActiveSockets.Remove(webSocket);
+            try
+            {
+                await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing the connection", CancellationToken.None);
+                ActiveSockets.Remove(webSocket);
+            }
+            catch
+            {
+                ActiveSockets.Remove(webSocket);
+            }
         }
 
         public async void SendToMessageOtherClients(MessageSendDto Message, WebSocket ParentSocket)

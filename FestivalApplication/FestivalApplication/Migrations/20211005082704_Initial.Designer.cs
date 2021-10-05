@@ -3,14 +3,16 @@ using System;
 using FestivalApplication.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FestivalApplication.Migrations
 {
     [DbContext(typeof(DBContext))]
-    partial class DBContextModelSnapshot : ModelSnapshot
+    [Migration("20211005082704_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,33 +42,6 @@ namespace FestivalApplication.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("Authentication");
-                });
-
-            modelBuilder.Entity("FestivalApplication.Model.Interaction", b =>
-                {
-                    b.Property<int>("InteractionID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("InteractionType")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("MessageID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime");
-
-                    b.Property<int?>("UserActivityID")
-                        .HasColumnType("int");
-
-                    b.HasKey("InteractionID");
-
-                    b.HasIndex("MessageID");
-
-                    b.HasIndex("UserActivityID");
-
-                    b.ToTable("Interaction");
                 });
 
             modelBuilder.Entity("FestivalApplication.Model.Message", b =>
@@ -162,21 +137,6 @@ namespace FestivalApplication.Migrations
                         .HasForeignKey("UserID");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("FestivalApplication.Model.Interaction", b =>
-                {
-                    b.HasOne("FestivalApplication.Model.Message", "Message")
-                        .WithMany()
-                        .HasForeignKey("MessageID");
-
-                    b.HasOne("FestivalApplication.Model.UserActivity", "UserActivity")
-                        .WithMany()
-                        .HasForeignKey("UserActivityID");
-
-                    b.Navigation("Message");
-
-                    b.Navigation("UserActivity");
                 });
 
             modelBuilder.Entity("FestivalApplication.Model.Message", b =>

@@ -4,7 +4,7 @@ using MySql.EntityFrameworkCore.Metadata;
 
 namespace FestivalApplication.Migrations
 {
-    public partial class InitialDBCreation : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -65,8 +65,8 @@ namespace FestivalApplication.Migrations
                 {
                     UserActivityID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    UserID = table.Column<int>(type: "int", nullable: false),
-                    StageID = table.Column<int>(type: "int", nullable: false),
+                    UserID = table.Column<int>(type: "int", nullable: true),
+                    StageID = table.Column<int>(type: "int", nullable: true),
                     Entry = table.Column<DateTime>(type: "datetime", nullable: false),
                     Exit = table.Column<DateTime>(type: "datetime", nullable: true)
                 },
@@ -74,11 +74,17 @@ namespace FestivalApplication.Migrations
                 {
                     table.PrimaryKey("PK_UserActivity", x => x.UserActivityID);
                     table.ForeignKey(
+                        name: "FK_UserActivity_Stage_StageID",
+                        column: x => x.StageID,
+                        principalTable: "Stage",
+                        principalColumn: "StageID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_UserActivity_User_UserID",
                         column: x => x.UserID,
                         principalTable: "User",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -113,6 +119,11 @@ namespace FestivalApplication.Migrations
                 column: "UserActivityID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserActivity_StageID",
+                table: "UserActivity",
+                column: "StageID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserActivity_UserID",
                 table: "UserActivity",
                 column: "UserID");
@@ -127,10 +138,10 @@ namespace FestivalApplication.Migrations
                 name: "Message");
 
             migrationBuilder.DropTable(
-                name: "Stage");
+                name: "UserActivity");
 
             migrationBuilder.DropTable(
-                name: "UserActivity");
+                name: "Stage");
 
             migrationBuilder.DropTable(
                 name: "User");

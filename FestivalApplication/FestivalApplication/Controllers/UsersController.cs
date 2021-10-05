@@ -107,12 +107,12 @@ namespace FestivalApplication.Controllers
                     dto.UserID = user.UserID;
                     dto.UserName = user.UserName;
                     dto.UserRole = user.Role;
-                    List<UserActivity> UserActivities = _context.UserActivity.Where(x => x.UserID == id).ToList();
+                    List<UserActivity> UserActivities = _context.UserActivity.Where(x => x.User.UserID == id).ToList();
                     dto.activities = new List<UserActivityWithMessageDto>();
                     foreach (UserActivity activity in UserActivities)
                     {
                         UserActivityWithMessageDto uadto = new UserActivityWithMessageDto();
-                        uadto.StageID = activity.StageID;
+                        uadto.StageID = activity.Stage.StageID;
                         uadto.Entry = activity.Entry;
                         uadto.Exit = activity.Exit;
                         List<Message> messages = _context.Message.Where(x => x.UserActivity.UserActivityID == activity.UserActivityID).ToList();

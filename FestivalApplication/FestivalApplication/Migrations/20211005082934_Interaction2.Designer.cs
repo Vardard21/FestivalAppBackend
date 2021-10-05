@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FestivalApplication.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20210927111644_InitialDBCreation")]
-    partial class InitialDBCreation
+    [Migration("20211005082934_Interaction2")]
+    partial class Interaction2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -42,6 +42,33 @@ namespace FestivalApplication.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("Authentication");
+                });
+
+            modelBuilder.Entity("FestivalApplication.Model.Interaction", b =>
+                {
+                    b.Property<int>("InteractionID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("InteractionType")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MessageID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime");
+
+                    b.Property<int?>("UserActivityID")
+                        .HasColumnType("int");
+
+                    b.HasKey("InteractionID");
+
+                    b.HasIndex("MessageID");
+
+                    b.HasIndex("UserActivityID");
+
+                    b.ToTable("Interaction");
                 });
 
             modelBuilder.Entity("FestivalApplication.Model.Message", b =>
@@ -115,13 +142,15 @@ namespace FestivalApplication.Migrations
                     b.Property<DateTime?>("Exit")
                         .HasColumnType("datetime");
 
-                    b.Property<int>("StageID")
+                    b.Property<int?>("StageID")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserID")
+                    b.Property<int?>("UserID")
                         .HasColumnType("int");
 
                     b.HasKey("UserActivityID");
+
+                    b.HasIndex("StageID");
 
                     b.HasIndex("UserID");
 
@@ -137,6 +166,21 @@ namespace FestivalApplication.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("FestivalApplication.Model.Interaction", b =>
+                {
+                    b.HasOne("FestivalApplication.Model.Message", "Message")
+                        .WithMany()
+                        .HasForeignKey("MessageID");
+
+                    b.HasOne("FestivalApplication.Model.UserActivity", "UserActivity")
+                        .WithMany()
+                        .HasForeignKey("UserActivityID");
+
+                    b.Navigation("Message");
+
+                    b.Navigation("UserActivity");
+                });
+
             modelBuilder.Entity("FestivalApplication.Model.Message", b =>
                 {
                     b.HasOne("FestivalApplication.Model.UserActivity", "UserActivity")
@@ -148,11 +192,17 @@ namespace FestivalApplication.Migrations
 
             modelBuilder.Entity("FestivalApplication.Model.UserActivity", b =>
                 {
-                    b.HasOne("FestivalApplication.Model.User", null)
+                    b.HasOne("FestivalApplication.Model.Stage", "Stage")
+                        .WithMany()
+                        .HasForeignKey("StageID");
+
+                    b.HasOne("FestivalApplication.Model.User", "User")
                         .WithMany("Log")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("Stage");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FestivalApplication.Model.User", b =>

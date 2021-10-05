@@ -40,7 +40,7 @@ namespace FestivalApplication.Controllers
                     }
 
                     //Check for all messages posted in the stage since the last update date
-                    var MessageHistory = _context.Message.Where(x => x.Timestamp > historyrequest.LastUpdated && x.UserActivity.StageID == historyrequest.StageID).Include(message => message.UserActivity).ToList();
+                    var MessageHistory = _context.Message.Where(x => x.Timestamp > historyrequest.LastUpdated && x.UserActivity.Stage.StageID == historyrequest.StageID).Include(message => message.UserActivity).ToList();
 
                     //Initialize the return list
                     List<MessageSendDto> ChatHistory = new List<MessageSendDto>();
@@ -53,7 +53,7 @@ namespace FestivalApplication.Controllers
                         dto.MessageText = message.MessageText;
                         dto.Timestamp = message.Timestamp;
                         //Find the author by UserID and assign the UserName and UserRole
-                        User Author = _context.User.Find(message.UserActivity.UserID);
+                        User Author = _context.User.Find(message.UserActivity.User.UserID);
                         dto.UserName = Author.UserName;
                         dto.UserRole = Author.Role;
                         //Add the new object to the return list
@@ -79,10 +79,10 @@ namespace FestivalApplication.Controllers
 
         // POST: api/Message
         [HttpPost]
-        public Response<string> PostMessage(MessageReceiveDto messagedto)
+        public Response<MessageSendDto> PostMessage(MessageReceiveDto messagedto)
         {
             //Create a new response with type string
-            Response<string> response = new Response<string>();
+            Response<MessageSendDto> response = new Response<MessageSendDto>();
 
             try {
                 AuthenticateKey auth = new AuthenticateKey();
@@ -90,8 +90,17 @@ namespace FestivalApplication.Controllers
                 {
                     //Create a new message to transfer the message data into
                     Message message = new Message();
+
+                    //Find the user associated with the message
+                    User Author = _context.User.Find(messagedto.UserID);
+                    if (Author == null)
+                    {
+                        response.InvalidData();
+                        return response;
+                    }
+
                     //Find UserActivities currently active for the UserID
-                    var activitiesfound = _context.UserActivity.Where(x => x.UserID == messagedto.UserID && x.Exit == default).ToList();
+                    var activitiesfound = _context.UserActivity.Where(x => x.User == Author && x.Exit == default).ToList();
 
                     //Check if the user is currently active in an activity
                     if (activitiesfound.Count() == 1)
@@ -107,6 +116,14 @@ namespace FestivalApplication.Controllers
                         {
                             //Message was saved correctly
                             response.Success = true;
+                            //Convert the message to a response Dto object
+                            MessageSendDto dto = new MessageSendDto();
+                            dto.MessageID = message.MessageID;
+                            dto.MessageText = message.MessageText;
+                            dto.Timestamp = message.Timestamp;
+                            dto.UserName = Author.UserName;
+                            dto.UserRole = Author.Role;
+                            response.Data = dto;
                             return response;
                         }
                         else
