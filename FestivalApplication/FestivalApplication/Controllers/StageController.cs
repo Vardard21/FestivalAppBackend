@@ -59,7 +59,7 @@ namespace FestivalApplication.Controllers
                             dto.CurrentSong = "Thunderstruck by AC/DC";
                             ////Find the amount of active users in the stage
                             dto.NumberOfUsers = _context.UserActivity
-                                .Where(x => x.StageID == stage.StageID)
+                                .Where(x => x.Stage.StageID == stage.StageID)
                                 .Where(x => x.Exit == default)
                                 .Count();
                             //Add the new object to the return list
@@ -112,7 +112,7 @@ namespace FestivalApplication.Controllers
 
                     //create a stages variable to be checked
                     var stageusers = _context.UserActivity
-                        .Where(x => x.StageID == id && x.Exit == default)
+                        .Where(x => x.Stage.StageID == id && x.Exit == default)
                         .ToList();
 
 
@@ -126,7 +126,7 @@ namespace FestivalApplication.Controllers
                         {
                             //Create a new Stage Request DTO and fill the id and name
                             StageUsersDto dto = new StageUsersDto();
-                            User user = _context.User.Find(useractivity.UserID);
+                            User user = _context.User.Find(useractivity.User.UserID);
                             dto.UserID = user.UserID;
                             dto.UserName = user.UserName;
                             dto.UserRole = user.Role;
@@ -170,13 +170,13 @@ namespace FestivalApplication.Controllers
                 AuthenticateKey auth = new AuthenticateKey();
                 if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    //Validate that the requestor is an admin
-                    if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
-                    {
-                        //User changing the role is not an admin
-                        response.InvalidOperation();
-                        return response;
-                    }
+                    ////Validate that the requestor is an admin
+                    //if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    //{
+                    //    //User changing the role is not an admin
+                    //    response.InvalidOperation();
+                    //    return response;
+                    //}
 
                     //create a new stage to be inserted in DB
                     Stage newStage = new Stage();

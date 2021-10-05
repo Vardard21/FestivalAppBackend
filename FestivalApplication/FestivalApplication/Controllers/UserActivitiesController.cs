@@ -52,12 +52,12 @@ namespace FestivalApplication.Controllers
 
                     //Process the useractivity
                     //Check if the user is already in an activity or whether a new activity must be made
-                    if (_context.UserActivity.Any(x => x.UserID == userActivity.UserID && x.Exit == default))
+                    if (_context.UserActivity.Any(x => x.User.UserID == userActivity.UserID && x.Exit == default))
                     {
                         //Update the current UserActivity to exit a stage
                         if (userActivity.StageID == 0)
                         {
-                            var ActiveActivity = _context.UserActivity.Where(x => x.UserID == userActivity.UserID && x.Exit == default).First();
+                            var ActiveActivity = _context.UserActivity.Where(x => x.User.UserID == userActivity.UserID && x.Exit == default).First();
                             ActiveActivity.Exit = DateTime.UtcNow;
                             _context.Entry(ActiveActivity).State = EntityState.Modified;
                         }
@@ -70,7 +70,10 @@ namespace FestivalApplication.Controllers
                     else
                     {
                         //Create a new UserActivity for this UserID and StageID
-                        UserActivity activity = new UserActivity(userActivity.StageID, userActivity.UserID);
+                        UserActivity activity = new UserActivity();
+                        activity.User = _context.User.Find(userActivity.UserID);
+                        activity.Stage = _context.Stage.Find(userActivity.StageID);
+                        activity.Entry = DateTime.UtcNow;
                         _context.UserActivity.Add(activity);
                     }
 

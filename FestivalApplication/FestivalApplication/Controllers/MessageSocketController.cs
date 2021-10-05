@@ -62,7 +62,8 @@ namespace WebSocketsTutorial.Controllers
                 SocketTypeReader MessageType = JsonConvert.DeserializeObject<SocketTypeReader>(received);
                 if(MessageType == null)
                 {
-                    break;
+                    //Clear buffer as well
+                    continue;
                 }
 
                 switch (MessageType.MessageType)
@@ -118,8 +119,17 @@ namespace WebSocketsTutorial.Controllers
             {
                 //Create a new message to transfer the message data into
                 Message message = new Message();
+
+                //Find the user associated with the message
+                User Author = _context.User.Find(messagedto.UserID);
+                if(Author == null)
+                {
+                    response.InvalidData();
+                    return response;
+                }
+
                 //Find UserActivities currently active for the UserID
-                var activitiesfound = _context.UserActivity.Where(x => x.UserID == messagedto.UserID && x.Exit == default).ToList();
+                var activitiesfound = _context.UserActivity.Where(x => x.User == Author && x.Exit == default).ToList();
 
                 //Check if the user is currently active in an activity
                 if (activitiesfound.Count() == 1)
@@ -137,7 +147,6 @@ namespace WebSocketsTutorial.Controllers
                         response.Success = true;
                         //Convert the message to a response Dto object
                         MessageSendDto dto = new MessageSendDto();
-                        User Author = _context.User.Find(message.UserActivity.UserID);
                         dto.MessageID = message.MessageID;
                         dto.MessageText = message.MessageText;
                         dto.Timestamp = message.Timestamp;

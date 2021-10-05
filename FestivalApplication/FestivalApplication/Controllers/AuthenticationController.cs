@@ -158,8 +158,11 @@ namespace FestivalApplication.Controllers
             //Delete the any authenticationkeys
             _context.Authentication.RemoveRange(_context.Authentication.Where(x => x.User.UserID == userid).ToList());
 
+            //Find the associated user
+            User user = _context.User.Find(userid);
+
             //Check for open UserActivities
-            var activities = _context.UserActivity.Where(x => x.UserID == userid && x.Exit == default).ToList();
+            var activities = _context.UserActivity.Where(x => x.User == user && x.Exit == default).ToList();
             if (activities.Count() > 0)
             {
                 //Close UserActivities
