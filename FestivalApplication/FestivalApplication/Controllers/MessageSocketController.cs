@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace WebSocketsTutorial.Controllers
+namespace FestivalApplication.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -37,7 +37,6 @@ namespace WebSocketsTutorial.Controllers
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                MessageSocketManager.Instance.AddSocket(webSocket);
                 await Echo(webSocket);
             }
             else
@@ -52,63 +51,167 @@ namespace WebSocketsTutorial.Controllers
             var buffer = new byte[1024 * 4];
             //Receive the incoming message and place the individual bytes into the buffer
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-
-            //Enter a while loop for as long as the connection is not closed
-            while (!result.CloseStatus.HasValue)
+            Authentication auth = JsonConvert.DeserializeObject<Authentication>(Encoding.UTF8.GetString(buffer));
+            AuthenticateKey Authenticator = new AuthenticateKey();
+           if (Authenticator.Authenticate(_context, auth.AuthenticationKey))
             {
-                //Receive the incoming message and place the individual bytes into the buffer
-                result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                string received = Encoding.UTF8.GetString(buffer);
-                SocketTypeReader MessageType = JsonConvert.DeserializeObject<SocketTypeReader>(received);
-                if(MessageType == null)
-                {
-                    //Clear buffer as well
-                    continue;
-                }
+                //Empty the buffer
+                buffer = new byte[1024 * 4];
+                //Confirm to the frontend that the connection is valid
+                var AuthConfirm = Encoding.UTF8.GetBytes("Authorization passed, connection now open");
+                //Send the message back to the Frontend through the webSocket
+                await webSocket.SendAsync(new ArraySegment<byte>(AuthConfirm, 0, AuthConfirm.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
 
-                switch (MessageType.MessageType)
+                MessageSocketManager.Instance.AddSocket(webSocket);
+                //Enter a while loop for as long as the connection is not closed
+                while (!result.CloseStatus.HasValue)
                 {
-                    case "NewMessage":
-                        //Try to process the message
-                        try
-                        {
-                            //Encode the array of bytes into a string, and convert the string into a messageReceiveDto object
-                            MessageReceiveDto responseObject = JsonConvert.DeserializeObject<MessageReceiveDto>(received);
+                    //Receive the incoming message and place the individual bytes into the buffer
+                    result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    string received = Encoding.UTF8.GetString(buffer);
+                    SocketTypeReader MessageType = JsonConvert.DeserializeObject<SocketTypeReader>(received);
+                    if (MessageType == null)
+                    {
+                        //Clear buffer as well
+                        continue;
+                    }
 
-                            SocketTypeWriter<Response<MessageSendDto>> response = new SocketTypeWriter<Response<MessageSendDto>>();
-                            response.MessageType = "PostResponse";
-                            response.Message = processMessage(responseObject);
-                            //Process the message and handle the response
-                            if (response != null)
+                    switch (MessageType.MessageType)
+                    {
+                        case "PostMessage":
+                            //Try to process the message
+                            try
                             {
+                                //Encode the array of bytes into a string, and convert the string into a messageReceiveDto object
+                                MessageReceiveDto responseObject = JsonConvert.DeserializeObject<MessageReceiveDto>(received);
+
+                                SocketTypeWriter<Response<MessageSendDto>> response = new SocketTypeWriter<Response<MessageSendDto>>();
+                                response.MessageType = "MessageResponse";
+                                response.Message = processMessage(responseObject);
+                                //Process the message and handle the response
+                                if (response != null)
+                                {
+                                    //Serialize the object and encode the object into an array of bytes
+                                    var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                                    //Send the message back to the Frontend through the webSocket
+                                    await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                                }
+                                if (response.Message.Success)
+                                {
+                                    MessageSocketManager.Instance.SendToMessageOtherClients(response.Message.Data, webSocket);
+                                }
+                            }
+                            catch (Exception exp)
+                            {
+                                //Send back a response with the exception
+                                Response<System.Exception> response = new Response<System.Exception>();
+                                response.ServerError();
+                                response.Data = exp;
                                 //Serialize the object and encode the object into an array of bytes
                                 var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
                                 //Send the message back to the Frontend through the webSocket
                                 await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
                             }
-                            if (response.Message.Success)
+                            break;
+                        case "PostInteraction":
+                            try
                             {
-                                MessageSocketManager.Instance.SendToMessageOtherClients(response.Message.Data, webSocket);
+                                //Encode the array of bytes into a string, and convert the string into a messageReceiveDto object
+                                InteractionReceiveDto responseObject = JsonConvert.DeserializeObject<InteractionReceiveDto>(received);
+
+                                SocketTypeWriter<Response<InteractionSendDto>> response = new SocketTypeWriter<Response<InteractionSendDto>>();
+                                response.MessageType = "InteractionResponse";
+                                response.Message = processInteraction(responseObject);
+                                //Process the Interaction and handle the response
+                                if (response != null)
+                                {
+                                    //Serialize the object and encode the object into an array of bytes
+                                    var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                                    //Send the message back to the Frontend through the webSocket
+                                    await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                                }
+                                if (response.Message.Success)
+                                {
+                                    // Find all message posted in the stage in the last 24 hours (limit 100) and count their interactions.
+                                    int StageID = _context.Message.Where(x => x.MessageID == responseObject.MessageID).Include(x => x.UserActivity.Stage).FirstOrDefault().UserActivity.Stage.StageID;
+                                    List<Message> messages = _context.Message.Where(x => x.UserActivity.Stage.StageID == StageID & x.Timestamp > DateTime.UtcNow.AddDays(-1)).Take(100).ToList();
+                                    List<int> InteractionTypes = _context.Interaction.Select(x => x.InteractionType).Distinct().ToList();
+                                    List<MessageInteractionsDto> interactions = new List<MessageInteractionsDto>();
+                                    foreach (Message message in messages)
+                                    {
+                                        if (_context.Interaction.Any(x => x.Message.MessageID == message.MessageID))
+                                        {
+                                            MessageInteractionsDto dto = new MessageInteractionsDto();
+                                            dto.MessageID = message.MessageID;
+                                            dto.Interactions = new List<InteractionDto>();
+                                            foreach (int InteractionType in InteractionTypes)
+                                            {
+                                                if (_context.Interaction.Any(x => x.Message.MessageID == message.MessageID & x.InteractionType == InteractionType))
+                                                {
+                                                    InteractionDto intdto = new InteractionDto();
+                                                    intdto.InteractionType = InteractionType;
+                                                    intdto.Count = _context.Interaction.Where(x => x.Message.MessageID == message.MessageID & x.InteractionType == InteractionType).Count();
+                                                    dto.Interactions.Add(intdto);
+                                                }
+                                            }
+                                            interactions.Add(dto);
+                                        }
+                                    }
+                                    MessageSocketManager.Instance.SendInteractionToOtherClients(interactions);
+                                }
                             }
-                        }
-                        catch (Exception exp)
-                        {
-                            //Send back a response with the exception
-                            Response<System.Exception> response = new Response<System.Exception>();
-                            response.ServerError();
-                            response.Data = exp;
-                            //Serialize the object and encode the object into an array of bytes
-                            var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
-                            //Send the message back to the Frontend through the webSocket
-                            await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
-                        }
-                        break;
+                            catch (Exception exp)
+                            {
+                                //Send back a response with the exception
+                                Response<System.Exception> response = new Response<System.Exception>();
+                                response.ServerError();
+                                response.Data = exp;
+                                //Serialize the object and encode the object into an array of bytes
+                                var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                                //Send the message back to the Frontend through the webSocket
+                                await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                            }
+                            break;
+                        default:
+                            try
+                            {
+                                //Return a default message
+                                Response<string> response = new Response<string>();
+                                response.RequestError();
+                                response.Data = "The supplied messagetype is not recognised";
+                                var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                                await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                            }
+                            catch (Exception exp)
+                            {
+                                //Send back a response with the exception
+                                Response<System.Exception> response = new Response<System.Exception>();
+                                response.ServerError();
+                                response.Data = exp;
+                                //Serialize the object and encode the object into an array of bytes
+                                var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                                //Send the message back to the Frontend through the webSocket
+                                await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                            }
+                            break;
+                    }
+                    //Empty the buffer
+                    buffer = new byte[1024 * 4];
                 }
-                //Empty the buffer
-                buffer = new byte[1024 * 4];
+                //Close the connection after exiting the while loop
+                MessageSocketManager.Instance.RemoveSocket(webSocket);
+            } else
+            {
+                //Confirm to the frontend that the authorization failed and close the connection
+                var AuthConfirm = Encoding.UTF8.GetBytes("Authorization failed, closing the connection");
+                //Send the message back to the Frontend through the webSocket
+                await webSocket.SendAsync(new ArraySegment<byte>(AuthConfirm, 0, AuthConfirm.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                //Close the connection
+                MessageSocketManager.Instance.RemoveSocket(webSocket);
             }
-            //Close the connection when requested
-            MessageSocketManager.Instance.RemoveSocket(webSocket);
+
+
+
         }
 
         private Response<MessageSendDto> processMessage(MessageReceiveDto messagedto)
@@ -165,6 +268,111 @@ namespace WebSocketsTutorial.Controllers
                 else
                 {
                     //There was no active UserActivity for this user
+                    response.InvalidOperation();
+                    return response;
+                }
+            }
+            catch
+            {
+                response.ServerError();
+                return response;
+            }
+        }
+
+        private Response<InteractionSendDto> processInteraction(InteractionReceiveDto Inputdto)
+        {
+            //Create a new response with type string
+            Response<InteractionSendDto> response = new Response<InteractionSendDto>();
+            try
+            {
+                //Find the corresponding user activity and message
+                UserActivity activity = _context.UserActivity.Where(x => x.User.UserID == Inputdto.UserID & x.Exit == default).Include(x => x.User).FirstOrDefault();
+                Message message = _context.Message.Find(Inputdto.MessageID);
+
+                //Check if activity and message exist
+                if(message != null & activity != null)
+                {
+                    //Find any previous interactions from the same user on the same message
+                    var InteractionGiven = _context.Interaction.Where(x => x.Message == message & x.UserActivity.User == activity.User).FirstOrDefault();
+
+                    if (InteractionGiven == null)
+                    {
+                        //If no interaction has been given, create a new interaction
+                        Interaction interaction = new Interaction();
+                        interaction.InteractionType = Inputdto.InteractionType;
+                        interaction.UserActivity = activity;
+                        interaction.Timestamp = DateTime.UtcNow;
+                        interaction.Message = _context.Message.Find(Inputdto.MessageID);
+                        _context.Interaction.Add(interaction);
+                        if (_context.SaveChanges() > 0)
+                        {
+                            //Changes saved
+                            response.Success = true;
+                            //Create a dto
+                            InteractionSendDto dto = new InteractionSendDto();
+                            dto.InteractionType = interaction.InteractionType;
+                            dto.Timestamp = interaction.Timestamp;
+                            dto.UserName = interaction.UserActivity.User.UserName;
+                            dto.Message = new MessageShortDto();
+                            dto.Message.MessageText = interaction.Message.MessageText;
+                            dto.Message.Timestamp = interaction.Message.Timestamp;
+                            response.Data = dto;
+                            return response;
+                        }
+                        else
+                        {
+                            //Failed to save the changes
+                            response.ServerError();
+                            return response;
+                        }
+                    }
+                    else
+                    {
+                        //If an interaction has already been given, check if the type is the same
+                        if (Inputdto.InteractionType == InteractionGiven.InteractionType)
+                        {
+                            //If the interaction type is the same, undo the interaction
+                            _context.Interaction.Remove(InteractionGiven);
+                            if (_context.SaveChanges() > 0)
+                            {
+                                response.Success = true;
+                                return response;
+                            }
+                            else
+                            {
+                                response.ServerError();
+                                return response;
+                            }
+                        }
+                        else
+                        {
+                            //If the interaction type is different, update the existing interaction to the new interaction
+                            InteractionGiven.InteractionType = Inputdto.InteractionType;
+                            _context.Entry(InteractionGiven).State = EntityState.Modified;
+                            if (_context.SaveChanges() > 0)
+                            {
+                                response.Success = true;
+                                //Create a dto
+                                InteractionSendDto dto = new InteractionSendDto();
+                                dto.InteractionType = InteractionGiven.InteractionType;
+                                dto.Timestamp = InteractionGiven.Timestamp;
+                                dto.UserName = InteractionGiven.UserActivity.User.UserName;
+                                dto.Message = new MessageShortDto();
+                                dto.Message.MessageText = InteractionGiven.Message.MessageText;
+                                dto.Message.Timestamp = InteractionGiven.Message.Timestamp;
+                                response.Data = dto;
+                                return response;
+                            }
+                            else
+                            {
+                                response.ServerError();
+                                return response;
+                            }
+                        }
+                    }
+                }
+                else
+                {
                     response.InvalidOperation();
                     return response;
                 }
