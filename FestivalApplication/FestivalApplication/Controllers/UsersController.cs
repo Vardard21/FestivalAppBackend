@@ -107,7 +107,7 @@ namespace FestivalApplication.Controllers
                     dto.UserID = user.UserID;
                     dto.UserName = user.UserName;
                     dto.UserRole = user.Role;
-                    List<UserActivity> UserActivities = _context.UserActivity.Where(x => x.User.UserID == id).ToList();
+                    List<UserActivity> UserActivities = _context.UserActivity.Where(x => x.User.UserID == id).Include(x=> x.Stage).ToList();
                     dto.activities = new List<UserActivityWithMessageDto>();
                     foreach (UserActivity activity in UserActivities)
                     {

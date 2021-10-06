@@ -50,6 +50,7 @@ namespace FestivalApplication.Controllers
                     {
                         //Create a new Send Message Object and fill the text and timestamp
                         MessageSendDto dto = new MessageSendDto();
+                        dto.MessageID = message.MessageID;
                         dto.MessageText = message.MessageText;
                         dto.Timestamp = message.Timestamp;
                         //Find the author by UserID and assign the UserName and UserRole

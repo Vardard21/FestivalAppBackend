@@ -61,11 +61,7 @@ namespace FestivalApplication.Controllers
             var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(SocketMessage));
             foreach (WebSocket socket in ActiveSockets)
             {
-                if(socket.State != WebSocketState.Open & socket.State != WebSocketState.Connecting)
-                {
-                    RemoveSocket(socket);
-                }
-                if(socket != ParentSocket)
+                if(socket.State == WebSocketState.Open & socket != ParentSocket)
                 {
                     try
                     {
@@ -78,5 +74,28 @@ namespace FestivalApplication.Controllers
                 }
             }
         }
+
+        public async void SendInteractionToOtherClients(List<MessageInteractionsDto> message)
+        {
+            SocketTypeWriter<List<MessageInteractionsDto>> SocketMessage = new SocketTypeWriter<List<MessageInteractionsDto>>();
+            SocketMessage.MessageType = "InteractionUpdate";
+            SocketMessage.Message = message;
+            var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(SocketMessage));
+            foreach (WebSocket socket in ActiveSockets)
+            {
+                if (socket.State == WebSocketState.Open)
+                {
+                    try
+                    {
+                        await socket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                    }
+                    catch
+                    {
+                        RemoveSocket(socket);
+                    }
+                }
+            }
+        }
+
     }
 }
