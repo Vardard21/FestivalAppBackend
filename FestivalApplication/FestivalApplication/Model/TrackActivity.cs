@@ -11,6 +11,8 @@ namespace FestivalApplication.Model
         public int MusicListID { get; set; }
         public int TrackID { get; set; }
         public int OrderNumber { get; set; }
+        public bool Playing { get; set; }
+
 
     }
 }

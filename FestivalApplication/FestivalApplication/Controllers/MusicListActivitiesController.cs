@@ -43,8 +43,8 @@ namespace FestivalApplication.Controllers
                 return response;
             }
 
-            //connect the list from 
-            var playlist = _context.TrackActivity.Where(x => x.MusicListID == id).ToList();
+            //find the list in list activities
+            var playlist = _context.TrackActivity.Where(x => x.MusicListID == id&& x.Playing==true).ToList();
 
             //create a list of tracks
             List<PlaylistRequestDto> RequestedTracks = new List<PlaylistRequestDto>();
@@ -76,65 +76,100 @@ namespace FestivalApplication.Controllers
 
         // PUT: api/MusicListActivities/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutMusicListActivity(int id, MusicListActivity musicListActivity)
+        [HttpPut("p/{id}")]
+        public Response<PlaylistSendDto> UpdateMusicActivity(int id, int musicid)
         {
-            if (id != musicListActivity.ID)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(musicListActivity).State = EntityState.Modified;
-
+            //create a response to send back
+            Response<PlaylistSendDto> response = new Response<PlaylistSendDto>();
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MusicListActivityExists(id))
+                //checks user authentification
+                AuthenticateKey auth = new AuthenticateKey();
+                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    return NotFound();
+                    //check if user is actually an artist ||REVERSED ATM||
+                    if (_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    {
+                        //User is not an artist
+                        response.InvalidOperation();
+                        Console.WriteLine("User is not an artist");
+                        return response;
+                    }
+
+                    // check if the playlist exists
+                    if (!(_context.MusicList.Where(x => x.ID == musicid).Count() == 1))
+                    {
+                        response.InvalidData();
+                        Console.WriteLine("Playlist doesnt exist");
+                        return response;
+                    }
+
+                    //checks which tracks are in the musiclist
+                    var playlist = _context.TrackActivity.Where(x => x.MusicListID == musicid).ToList();
+
+                    //turn all playing to false
+                    foreach (TrackActivity trackactivity in playlist)
+                    {
+                        {
+                            trackactivity.Playing = false;
+                            _context.Entry(trackactivity).State = EntityState.Modified;
+                        }
+                    }
+
+                    //find selected track
+                    var selectedtrack = _context.TrackActivity.Where(x=>x.TrackID==id).ToList();
+
+                    //check if selected track only has 1 entry
+                    if (selectedtrack.Count() == 1)
+                    {
+                        foreach (TrackActivity trackactivity in selectedtrack)
+                        {
+                            {
+                                trackactivity.Playing = true;
+                                Track track =_context.Track.Find(trackactivity.TrackID);
+                                PlaylistSendDto dto = new PlaylistSendDto();
+                                dto.TrackName = track.TrackName;
+
+
+                                _context.Entry(trackactivity).State = EntityState.Modified;
+                                if (_context.SaveChanges() > 0)
+                                {
+                                    //Track has been set to playing
+                                    response.Success = true;
+                                    response.Data=dto ;
+                                    return response;
+                                }
+                                else
+                                {
+                                    //Error in saving track
+                                    response.ServerError();
+                                    return response;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        response.InvalidData();
+
+                        return response;
+                    }
+
+                    return response;
+
                 }
                 else
                 {
-                    throw;
+                    response.AuthorizationError();
+                    return response;
                 }
+
             }
-
-            return NoContent();
-        }
-
-        // POST: api/MusicListActivities
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<MusicListActivity>> PostMusicListActivity(MusicListActivity musicListActivity)
-        {
-            _context.MusicListActivity.Add(musicListActivity);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetMusicListActivity", new { id = musicListActivity.ID }, musicListActivity);
-        }
-
-        // DELETE: api/MusicListActivities/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMusicListActivity(int id)
-        {
-            var musicListActivity = await _context.MusicListActivity.FindAsync(id);
-            if (musicListActivity == null)
+            catch
             {
-                return NotFound();
+                response.ServerError();
+                return response;
             }
-
-            _context.MusicListActivity.Remove(musicListActivity);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool MusicListActivityExists(int id)
-        {
-            return _context.MusicListActivity.Any(e => e.ID == id);
         }
     }
 }

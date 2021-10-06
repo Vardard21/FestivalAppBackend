@@ -272,7 +272,7 @@ namespace FestivalApplication.Controllers
                         }
                         else
                         {
-                            //stage was not updated succesfully
+                            //Error in updating stage
                             response.ServerError();
                             response.Data = "State has not been updated";
                             return response;
