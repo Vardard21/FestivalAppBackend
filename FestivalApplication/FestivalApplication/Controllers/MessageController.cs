@@ -31,7 +31,7 @@ namespace FestivalApplication.Controllers
             try
             {
                 AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Validate LastUpdated date and set default to one hour ago
                     if (historyrequest.LastUpdated < DateTime.UtcNow.AddHours(-1))
@@ -87,7 +87,7 @@ namespace FestivalApplication.Controllers
 
             try {
                 AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Create a new message to transfer the message data into
                     Message message = new Message();

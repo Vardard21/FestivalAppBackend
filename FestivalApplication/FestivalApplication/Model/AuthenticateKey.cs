@@ -9,28 +9,37 @@ namespace FestivalApplication.Model
 {
     public class AuthenticateKey
     {
+        private Boolean test = false;
+
         public Boolean Authenticate(DBContext context, string Key)
         {
-            context.Authentication.RemoveRange(context.Authentication.Where(x => x.CurrentExpiryDate > DateTime.UtcNow));
-            if (context.Authentication.Any(x => x.AuthenticationKey == Key))
+            if (test)
             {
-                Authentication auth = context.Authentication.Where(x => x.AuthenticationKey == Key).FirstOrDefault();
-                if (auth.MaxExpiryDate < DateTime.UtcNow.AddMinutes(15))
+                return true;
+            } else
+            {
+                context.Authentication.RemoveRange(context.Authentication.Where(x => x.CurrentExpiryDate > DateTime.UtcNow));
+                if (context.Authentication.Any(x => x.AuthenticationKey == Key))
                 {
-                    auth.CurrentExpiryDate = auth.MaxExpiryDate;
+                    Authentication auth = context.Authentication.Where(x => x.AuthenticationKey == Key).FirstOrDefault();
+                    if (auth.MaxExpiryDate < DateTime.UtcNow.AddMinutes(15))
+                    {
+                        auth.CurrentExpiryDate = auth.MaxExpiryDate;
+                    }
+                    else
+                    {
+                        auth.CurrentExpiryDate = DateTime.UtcNow.AddMinutes(15);
+                    }
+                    context.Entry(auth).State = EntityState.Modified;
+                    context.SaveChanges();
+                    return true;
                 }
                 else
                 {
-                    auth.CurrentExpiryDate = DateTime.UtcNow.AddMinutes(15);
+                    return false;
                 }
-                context.Entry(auth).State = EntityState.Modified;
-                context.SaveChanges();
-                return true;
             }
-            else
-            {
-                return false;
-            }
+
         }
 
     }

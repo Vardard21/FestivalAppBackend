@@ -34,7 +34,7 @@ namespace FestivalApplication.Controllers
             try
             {
                 AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //create a stages variable to be checked
                     var stagesstatus = _context.Stage
@@ -103,7 +103,7 @@ namespace FestivalApplication.Controllers
             try
             {
                 AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //checks if stage exists
                     if (!_context.Stage.Any(x => x.StageID == id))
@@ -175,15 +175,15 @@ namespace FestivalApplication.Controllers
             try
             {
                 AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    ////Validate that the requestor is an admin
-                    //if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
-                    //{
-                    //    //User changing the role is not an admin
-                    //    response.InvalidOperation();
-                    //    return response;
-                    //}
+                    //Validate that the requestor is an admin
+                    if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    {
+                        //User changing the role is not an admin
+                        response.InvalidOperation();
+                        return response;
+                    }
 
                     //create a new stage to be inserted in DB
                     Stage newStage = new Stage();
@@ -246,10 +246,10 @@ namespace FestivalApplication.Controllers
             try
             {
                 AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Validate that the requestor is an admin
-                    if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    if (_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
                     {
                         //User changing the role is not an admin
                         response.InvalidOperation();

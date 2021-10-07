@@ -51,9 +51,9 @@ namespace FestivalApplication.Controllers
             var buffer = new byte[1024 * 4];
             //Receive the incoming message and place the individual bytes into the buffer
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            Authentication auth = JsonConvert.DeserializeObject<Authentication>(Encoding.UTF8.GetString(buffer));
-            AuthenticateKey Authenticator = new AuthenticateKey();
-           if (Authenticator.Authenticate(_context, auth.AuthenticationKey))
+            Authentication key = JsonConvert.DeserializeObject<Authentication>(Encoding.UTF8.GetString(buffer));
+            AuthenticateKey auth = new AuthenticateKey();
+           if (auth.Authenticate(_context, key.AuthenticationKey))
             {
                 //Empty the buffer
                 buffer = new byte[1024 * 4];
