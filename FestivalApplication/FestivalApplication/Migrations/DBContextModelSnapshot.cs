@@ -97,6 +97,9 @@ namespace FestivalApplication.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<bool>("Archived")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<bool>("StageActive")
                         .HasColumnType("tinyint(1)");
 
@@ -113,6 +116,9 @@ namespace FestivalApplication.Migrations
                     b.Property<int>("UserID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    b.Property<bool>("Archived")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("PassWord")
                         .HasColumnType("text");
@@ -171,7 +177,7 @@ namespace FestivalApplication.Migrations
                         .HasForeignKey("MessageID");
 
                     b.HasOne("FestivalApplication.Model.UserActivity", "UserActivity")
-                        .WithMany()
+                        .WithMany("Interactions")
                         .HasForeignKey("UserActivityID");
 
                     b.Navigation("Message");
@@ -191,7 +197,7 @@ namespace FestivalApplication.Migrations
             modelBuilder.Entity("FestivalApplication.Model.UserActivity", b =>
                 {
                     b.HasOne("FestivalApplication.Model.Stage", "Stage")
-                        .WithMany()
+                        .WithMany("Log")
                         .HasForeignKey("StageID");
 
                     b.HasOne("FestivalApplication.Model.User", "User")
@@ -203,6 +209,11 @@ namespace FestivalApplication.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("FestivalApplication.Model.Stage", b =>
+                {
+                    b.Navigation("Log");
+                });
+
             modelBuilder.Entity("FestivalApplication.Model.User", b =>
                 {
                     b.Navigation("Log");
@@ -210,6 +221,8 @@ namespace FestivalApplication.Migrations
 
             modelBuilder.Entity("FestivalApplication.Model.UserActivity", b =>
                 {
+                    b.Navigation("Interactions");
+
                     b.Navigation("MessageHistory");
                 });
 #pragma warning restore 612, 618

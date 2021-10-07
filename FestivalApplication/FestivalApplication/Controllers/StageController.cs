@@ -15,7 +15,7 @@ using FestivalApplication.Model.DataTransferObjects;
 
 namespace FestivalApplication.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Stage")]
     [ApiController]
     public class StageController : ControllerBase
     {
@@ -249,7 +249,7 @@ namespace FestivalApplication.Controllers
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Validate that the requestor is an admin
-                    if (_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
                     {
                         //User changing the role is not an admin
                         response.InvalidOperation();
@@ -261,7 +261,7 @@ namespace FestivalApplication.Controllers
 
                     {
                         //Check if the state is actually different
-                        if (!_context.Stage.Any(x => x.StageActive == changestage.StageActive))
+                        if (_context.Stage.Any(x => x.StageActive == changestage.StageActive))
                         {
                             //Stage is already at that state
                             response.Success = false;
@@ -312,7 +312,141 @@ namespace FestivalApplication.Controllers
                 return response;
             }
         }
+
+        // DELETE api/<LoginController>/5
+        [HttpDelete("{StageID}")]
+        public Response<string> Delete(int StageID)
+        {
+            //Create a new response
+            Response<string> response = new Response<string>();
+            try
+            {
+                //Validate the authentication key
+                AuthenticateKey auth = new AuthenticateKey();
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
+                {
+                    //Validate that the user deleting the stage is an admin
+                    if(!_context.Authentication.Any(x=> x.AuthenticationKey == Request.Headers["Authorization"] && x.User.Role == "admin"))
+                    {
+                        response.InvalidOperation();
+                        return response;
+                    }
+                    //Validate that the stage exists
+                    Stage stage = _context.Stage.Find(StageID);
+                    if(stage == null)
+                    {
+                        response.InvalidData();
+                        return response;
+                    }
+
+                    //Validate that the stage is inactive
+                    if (stage.StageActive)
+                    {
+                        response.InvalidOperation();
+                        return response;
+                    }
+
+                    //Validate that the stage is empty
+                    if (_context.UserActivity.Where(x=> x.Stage == stage && x.Exit == default).Count() > 0)
+                    {
+                        response.InvalidOperation();
+                        return response;
+                    }
+
+                    //Delete the stage
+                    stage.Archived = true;
+                    _context.Entry(stage).State = EntityState.Modified;
+                    if(_context.SaveChanges() > 0)
+                    {
+                        response.Success = true;
+                        return response;
+                    }
+                    else
+                    {
+                        response.ServerError();
+                        return response;
+                    }
+                }
+                else
+                {
+                    response.AuthorizationError();
+                    return response;
+                }
+            }
+            catch
+            {
+                response.ServerError();
+                return response;
+            }
+        }
+
+        [Route("api/Stage/all")]
+        // GET: api/<StageController>
+        [HttpGet]
+        public Response<List<StagesRequestDto>> GetallStages()
+        {
+            //creates a response variable to be sent
+            Response<List<StagesRequestDto>> response = new Response<List<StagesRequestDto>>();
+            try
+            {
+                AuthenticateKey auth = new AuthenticateKey();
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
+                {
+                    //create a stages variable to be checked
+                    var stagesstatus = _context.Stage
+                        .Where(x => x.Archived == false)
+                        .ToList();
+
+
+                    //create a list of active stages
+                    List<StagesRequestDto> ActiveStages = new List<StagesRequestDto>();
+
+                    if (!ActiveStages.Any())
+                    {
+
+                        //create a for loop for each stage in stage status
+                        foreach (Stage stage in stagesstatus)
+                        {
+                            //Create a new Stage Request DTO and fill the id and name
+                            StagesRequestDto dto = new StagesRequestDto();
+                            dto.StageID = stage.StageID;
+                            dto.StageName = stage.StageName;
+                            //Find the Current Song, temporarily only manually defined
+                            dto.CurrentSong = "Thunderstruck by AC/DC";
+                            ////Find the amount of active users in the stage
+                            dto.NumberOfUsers = _context.UserActivity
+                                .Where(x => x.Stage.StageID == stage.StageID)
+                                .Where(x => x.Exit == default)
+                                .Count();
+                            //Add the new object to the return list
+                            ActiveStages.Add(dto);
+                        }
+
+                        response.Success = true;
+                        response.Data = ActiveStages;
+                        return response;
+                    }
+                    else
+                    {
+                        response.Success = false;
+                        response.Data = ActiveStages;
+                        response.ErrorMessage.Add(1);
+                        return response;
+                    }
+                }
+                else
+                {
+                    response.AuthorizationError();
+                    return response;
+                }
+            }
+            catch
+            {
+                response.Success = false;
+                response.ErrorMessage.Add(1);
+                return response;
+            }
+        }
     }
-    
 }
 

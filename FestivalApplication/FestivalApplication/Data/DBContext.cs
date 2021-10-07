@@ -20,5 +20,6 @@ namespace FestivalApplication.Data
         public DbSet<FestivalApplication.Model.Stage> Stage { get; set; }
         public DbSet<FestivalApplication.Model.Authentication> Authentication { get; set; }
         public DbSet<FestivalApplication.Model.Interaction> Interaction { get; set; }
+
     }
 }

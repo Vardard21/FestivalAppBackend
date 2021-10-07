@@ -18,7 +18,8 @@ namespace FestivalApplication.Model
                 return true;
             } else
             {
-                context.Authentication.RemoveRange(context.Authentication.Where(x => x.CurrentExpiryDate > DateTime.UtcNow));
+                context.Authentication.RemoveRange(context.Authentication.Where(x => x.CurrentExpiryDate < DateTime.UtcNow));
+                context.SaveChanges();
                 if (context.Authentication.Any(x => x.AuthenticationKey == Key))
                 {
                     Authentication auth = context.Authentication.Where(x => x.AuthenticationKey == Key).FirstOrDefault();
@@ -39,8 +40,6 @@ namespace FestivalApplication.Model
                     return false;
                 }
             }
-
         }
-
     }
 }
