@@ -44,7 +44,7 @@ namespace FestivalApplication.Controllers
             }
 
             //find the list in list activities
-            var playlist = _context.TrackActivity.Where(x => x.MusicListID == id&& x.Playing==true).ToList();
+            var playlist = _context.TrackActivity.Where(x => x.MusicListID == id).ToList();
 
             //create a list of tracks
             List<PlaylistRequestDto> RequestedTracks = new List<PlaylistRequestDto>();
@@ -77,10 +77,10 @@ namespace FestivalApplication.Controllers
         // PUT: api/MusicListActivities/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("p/{id}")]
-        public Response<PlaylistSendDto> UpdateMusicActivity(int id, int musicid)
+        public Response<PlaylistUpdateDto> UpdateMusicActivity(int id, int musicid)
         {
             //create a response to send back
-            Response<PlaylistSendDto> response = new Response<PlaylistSendDto>();
+            Response<PlaylistUpdateDto> response = new Response<PlaylistUpdateDto>();
             try
             {
                 //checks user authentification
@@ -127,7 +127,7 @@ namespace FestivalApplication.Controllers
                             {
                                 trackactivity.Playing = true;
                                 Track track =_context.Track.Find(trackactivity.TrackID);
-                                PlaylistSendDto dto = new PlaylistSendDto();
+                                PlaylistUpdateDto dto = new PlaylistUpdateDto();
                                 dto.TrackName = track.TrackName;
 
 

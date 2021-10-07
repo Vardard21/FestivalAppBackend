@@ -54,12 +54,12 @@ namespace FestivalApplication.Controllers
             }
         }
 
-        public async void SendToTrackOtherClients(PlaylistSendDto track, WebSocket ParentSocket)
+        public async void SendToTrackOtherClients(Response<PlaylistUpdateDto> track, WebSocket ParentSocket)
         {
-            SocketTypeWriter<PlaylistSendDto> SocketMessage = new SocketTypeWriter<PlaylistSendDto>();
+            SocketTypeWriter<PlaylistUpdateDto> SocketMessage = new SocketTypeWriter<PlaylistUpdateDto>();
             SocketMessage.MessageType = "IncomingTrack";
-            SocketMessage.Message = track;
-            var responseMsg = Encoding.UTF8.GetBytes(track.TrackName);
+            SocketMessage.Message = track.Data;
+            var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(track));
             foreach (WebSocket socket in ActiveSockets)
             {
                 if (socket.State != WebSocketState.Open & socket.State != WebSocketState.Connecting)

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace FestivalApplication.Model.DataTransferObjects
 {
-    public class PlaylistSendDto
+    public class PlaylistUpdateDto
     {
         //public int PlaylistID { get; set; }
         //public int TrackNumber { get; set; }
@@ -15,6 +15,8 @@ namespace FestivalApplication.Model.DataTransferObjects
 
 
         public string TrackName { get; set; }
+        public string TrackSource { get; set; }
+
 
 
     }

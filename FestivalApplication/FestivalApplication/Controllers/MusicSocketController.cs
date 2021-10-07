@@ -36,6 +36,7 @@ namespace FestivalApplication.Controllers
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+                MusicSocketManager.Instance.AddSocket(webSocket);
                 _logger.Log(LogLevel.Information, "WebSocket connection established");
                 await Echo(webSocket);
             }
@@ -48,43 +49,31 @@ namespace FestivalApplication.Controllers
         private async Task Echo(WebSocket webSocket)
         {
             //Create a buffer in which to store the incoming bytes
-            var buffer = new byte[4];
+            var buffer = new byte[4 * 1024];
             //Recieve the incoming URL and place the individual bytes into the buffer
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             _logger.Log(LogLevel.Information, "New song received from Client");
-            buffer = new byte[4];
+            
 
             //Enter a while loop for as long as the connection is not closed
             while (!result.CloseStatus.HasValue)
             {
+                
                 //Recieve the incoming TrackID and place the individual bytes into the buffer
                 result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 string received = Encoding.UTF8.GetString(buffer);
-                //initialize 2 integers to send to SelectNewTrack
-                int receivedint1;
-                int receivedint2;
 
-                // convert the recieved string to the above 2 integers 
-                if (int.TryParse(received, out int parsed))
-                {
-                    //grab the first digit
-                    int i = Math.Abs(parsed);
-                    while(i>=10)
-                    { i /= 10; }
-                    receivedint1 = i;
-                    //grab the last digit
-                    int j = Math.Abs(parsed) % 10;
-                    receivedint2 = j;
-                }
-                else
-                {
-                      receivedint1 = 1;
-                      receivedint2 = 1; 
-                }
-                
+                //convert byte array to json
+                var incomingjson =JsonConvert.DeserializeObject<PlaylistReceiveDto>(received);
+
+
+
+                int receivedint1 =incomingjson.TrackID;
+                int receivedint2 =incomingjson.PlaylistID;
+
                 //Serialize the object and encode the object into an array of bytes
-                var responseMsg = SelectNewTrack(receivedint1, receivedint2).Data;
-                var encodedresponseMsg= Encoding.UTF8.GetBytes(responseMsg.TrackName.ToString());
+                var responseMsg = SelectNewTrack(receivedint1, receivedint2);
+                var encodedresponseMsg= Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(responseMsg));
                 //Send the message back to the Frontend through the webSocket
                 await webSocket.SendAsync(new ArraySegment<byte>(encodedresponseMsg, 0, encodedresponseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
 
@@ -94,16 +83,16 @@ namespace FestivalApplication.Controllers
                 }
 
                 //Empty the buffer
-                buffer = new byte[4];
+                buffer = new byte[4 * 1024];
 
             }
             //Close the connection when requested
             MusicSocketManager.Instance.RemoveSocket(webSocket);
         }
-        private Response<PlaylistSendDto> SelectNewTrack(int id, int musicid)
+        private Response<PlaylistUpdateDto> SelectNewTrack(int id, int musicid)
         {
             //create a response to send back
-            Response<PlaylistSendDto> response = new Response<PlaylistSendDto>();
+            Response<PlaylistUpdateDto> response = new Response<PlaylistUpdateDto>();
             try
             {
                 //checks user authentification
@@ -140,7 +129,7 @@ namespace FestivalApplication.Controllers
                     }
 
                     //find selected track
-                    var selectedtrack = _context.TrackActivity.Where(x => x.TrackID == id).ToList();
+                    var selectedtrack = _context.TrackActivity.Where(x => x.TrackID == id && x.MusicListID==musicid).ToList();
 
                     //check if selected track only has 1 entry
                     if (selectedtrack.Count() == 1)
@@ -150,8 +139,9 @@ namespace FestivalApplication.Controllers
                             {
                                 trackactivity.Playing = true;
                                 Track track = _context.Track.Find(trackactivity.TrackID);
-                                PlaylistSendDto dto = new PlaylistSendDto();
+                                PlaylistUpdateDto dto = new PlaylistUpdateDto();
                                 dto.TrackName = track.TrackName;
+                                dto.TrackSource = track.TrackSource;
 
 
                                 _context.Entry(trackactivity).State = EntityState.Modified;
