@@ -18,6 +18,5 @@ namespace FestivalApplication.Model.DataTransferObjects
         public string TrackSource { get; set; }
         public int Length { get; set; }
 
-
     }
 }

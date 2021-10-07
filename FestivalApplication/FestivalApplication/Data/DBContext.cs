@@ -19,6 +19,11 @@ namespace FestivalApplication.Data
         public DbSet<FestivalApplication.Model.User> User { get; set; }
         public DbSet<FestivalApplication.Model.Stage> Stage { get; set; }
         public DbSet<FestivalApplication.Model.Authentication> Authentication { get; set; }
+        public DbSet<FestivalApplication.Model.Track> Track { get; set; }
+        public DbSet<FestivalApplication.Model.TrackActivity> TrackActivity { get; set; }
+        public DbSet<FestivalApplication.Model.MusicList> MusicList { get; set; }
+        public DbSet<FestivalApplication.Model.MusicListActivity> MusicListActivity { get; set; }
         public DbSet<FestivalApplication.Model.Interaction> Interaction { get; set; }
+
     }
 }
