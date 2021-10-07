@@ -59,7 +59,7 @@ namespace FestivalApplication.Controllers
             SocketTypeWriter<PlaylistSendDto> SocketMessage = new SocketTypeWriter<PlaylistSendDto>();
             SocketMessage.MessageType = "IncomingTrack";
             SocketMessage.Message = track;
-            var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(SocketMessage));
+            var responseMsg = Encoding.UTF8.GetBytes(track.TrackName);
             foreach (WebSocket socket in ActiveSockets)
             {
                 if (socket.State != WebSocketState.Open & socket.State != WebSocketState.Connecting)

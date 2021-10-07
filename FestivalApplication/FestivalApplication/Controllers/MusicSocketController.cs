@@ -23,7 +23,7 @@ namespace FestivalApplication.Controllers
     {
         private readonly ILogger<MusicSocketController> _logger;
         private readonly DBContext _context;
-        private List<WebSocket> ActiveSockets = new List<WebSocket>();
+
         public MusicSocketController(ILogger<MusicSocketController> logger, DBContext context)
         {
             _logger = logger;
@@ -52,7 +52,7 @@ namespace FestivalApplication.Controllers
             //Recieve the incoming URL and place the individual bytes into the buffer
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             _logger.Log(LogLevel.Information, "New song received from Client");
-
+            buffer = new byte[4];
 
             //Enter a while loop for as long as the connection is not closed
             while (!result.CloseStatus.HasValue)
@@ -94,7 +94,7 @@ namespace FestivalApplication.Controllers
                 }
 
                 //Empty the buffer
-                buffer = new byte[1024 * 4];
+                buffer = new byte[4];
 
             }
             //Close the connection when requested
@@ -110,7 +110,7 @@ namespace FestivalApplication.Controllers
                 AuthenticateKey auth = new AuthenticateKey();
                 if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    //check if user is actually an artist ||REVERSED ATM||
+                    //check if user is actually an artist 
                     if (_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
                     {
                         //User is not an artist

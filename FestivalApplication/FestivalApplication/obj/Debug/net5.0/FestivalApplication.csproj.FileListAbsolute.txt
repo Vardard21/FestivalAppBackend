@@ -146,7 +146,6 @@ C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\F
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Debug\net5.0\FestivalApplication.genruntimeconfig.cache
 C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\appsettings.Development.json
 C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\appsettings.json
-C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\appsettings.Production.json
 C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\FestivalApplication.exe
 C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\FestivalApplication.deps.json
 C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\FestivalApplication.runtimeconfig.json
