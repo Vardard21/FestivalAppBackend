@@ -97,5 +97,27 @@ namespace FestivalApplication.Controllers
             }
         }
 
+        public async void SendDeleteNotificationToClients(int MessageID)
+        {
+            SocketTypeWriter<int> SocketMessage = new SocketTypeWriter<int>();
+            SocketMessage.MessageType = "DeletedMessage";
+            SocketMessage.Message = MessageID;
+            var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(SocketMessage));
+            foreach (WebSocket socket in ActiveSockets)
+            {
+                if (socket.State == WebSocketState.Open)
+                {
+                    try
+                    {
+                        await socket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                    }
+                    catch
+                    {
+                        RemoveSocket(socket);
+                    }
+                }
+            }
+        }
+
     }
 }

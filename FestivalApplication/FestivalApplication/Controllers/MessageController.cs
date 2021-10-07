@@ -153,5 +153,55 @@ namespace FestivalApplication.Controllers
                 return response;
             }
         }
+
+        // DELETE
+        [HttpDelete("{MessageID}")]
+        public Response<string> Delete(int MessageID)
+        {
+            //Create a new response
+            Response<string> response = new Response<string>();
+            try
+            {
+                //Validate the authentication key
+                AuthenticateKey auth = new AuthenticateKey();
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
+                {
+                    //Validate that the message exists
+                    Message message = _context.Message.Find(MessageID);
+                    if (message == null)
+                    {
+                        response.InvalidData();
+                        return response;
+                    }
+
+                    //Remove any interactions
+                    _context.Interaction.RemoveRange(_context.Interaction.Where(x => x.Message == message));
+
+                    //Delete the message
+                    if (_context.SaveChanges() > 0)
+                    {
+                        //Notify the socket of deleted message
+                        MessageSocketManager.Instance.SendDeleteNotificationToClients(MessageID);
+                        response.Success = true;
+                        return response;
+                    }
+                    else
+                    {
+                        response.ServerError();
+                        return response;
+                    }                    
+                }
+                else
+                {
+                    response.AuthorizationError();
+                    return response;
+                }
+            }
+            catch
+            {
+                response.ServerError();
+                return response;
+            }
+        }
     }
 }

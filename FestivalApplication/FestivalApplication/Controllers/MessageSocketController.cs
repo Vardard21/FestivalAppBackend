@@ -23,7 +23,6 @@ namespace FestivalApplication.Controllers
     {
         private readonly ILogger<WebSocketsController> _logger;
         private readonly DBContext _context;
-        private List<WebSocket> ActiveSockets = new List<WebSocket>();
 
         public WebSocketsController(ILogger<WebSocketsController> logger, DBContext context)
         {
@@ -158,6 +157,39 @@ namespace FestivalApplication.Controllers
                                         }
                                     }
                                     MessageSocketManager.Instance.SendInteractionToOtherClients(interactions);
+                                }
+                            }
+                            catch (Exception exp)
+                            {
+                                //Send back a response with the exception
+                                Response<System.Exception> response = new Response<System.Exception>();
+                                response.ServerError();
+                                response.Data = exp;
+                                //Serialize the object and encode the object into an array of bytes
+                                var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                                //Send the message back to the Frontend through the webSocket
+                                await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                            }
+                            break;
+                        case "DeleteMessage":
+                            try
+                            {
+                                int responseObject = JsonConvert.DeserializeObject<MessageIDReaderDto>(received).MessageID;
+
+                                SocketTypeWriter<Response<string>> response = new SocketTypeWriter<Response<string>>();
+                                response.MessageType = "DeleteResponse";
+                                response.Message = DeleteMessage(responseObject);
+                                //Process the Interaction and handle the response
+                                if (response != null)
+                                {
+                                    //Serialize the object and encode the object into an array of bytes
+                                    var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                                    //Send the message back to the Frontend through the webSocket
+                                    await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                                }
+                                if (response.Message.Success)
+                                {                                    
+                                    MessageSocketManager.Instance.SendDeleteNotificationToClients(responseObject);
                                 }
                             }
                             catch (Exception exp)
@@ -378,6 +410,36 @@ namespace FestivalApplication.Controllers
                 }
             }
             catch
+            {
+                response.ServerError();
+                return response;
+            }
+        }
+
+        private Response<string> DeleteMessage(int MessageID)
+        {
+            Response<string> response = new Response<string>();
+
+            //Validate that the message exists
+            Message message = _context.Message.Find(MessageID);
+            if (message == null)
+            {
+                response.InvalidData();
+                return response;
+            }
+
+            //Remove any interactions
+            _context.Interaction.RemoveRange(_context.Interaction.Where(x => x.Message == message));
+
+            //Delete the message
+            if (_context.SaveChanges() > 0)
+            {
+                //Notify the socket of deleted message
+                MessageSocketManager.Instance.SendDeleteNotificationToClients(MessageID);
+                response.Success = true;
+                return response;
+            }
+            else
             {
                 response.ServerError();
                 return response;

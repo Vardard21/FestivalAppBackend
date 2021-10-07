@@ -226,45 +226,35 @@ namespace FestivalApplication.Controllers
             //Create a new response
             Response<int> response = new Response<int>();
             try {
-                AuthenticateKey auth = new AuthenticateKey();
-                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
+                //Validate that the fields exist
+                if (user.PassWord != null && user.UserName != null)
                 {
-                    //Validate that the fields exist
-                    if (user.PassWord != null && user.UserName != null)
+                    //Validate that the username does not exist
+                    if (_context.User.Any(x => x.UserName == user.UserName))
                     {
-                        //Validate that the username does not exist
-                        if (_context.User.Any(x => x.UserName == user.UserName))
-                        {
-                            response.InvalidData();
-                            return response;
-                        }
-                        User NewUser = new User();
-                        NewUser.UserName = user.UserName;
-                        NewUser.PassWord = user.PassWord;
-                        NewUser.Role = "visitor";
-                        _context.User.Add(NewUser);
+                        response.InvalidData();
+                        return response;
                     }
+                    User NewUser = new User();
+                    NewUser.UserName = user.UserName;
+                    NewUser.PassWord = user.PassWord;
+                    NewUser.Role = "visitor";
+                    _context.User.Add(NewUser);
+                }
 
-                    //Save the changes
-                    if (_context.SaveChanges() > 0)
-                    {
-                        //Message was saved correctly
-                        response.Success = true;
-                        response.Data = _context.User.Where(x => x.UserName == user.UserName).First().UserID;
-                        return response;
-                    }
-                    else
-                    {
-                        //Message was not saved correctly
-                        response.Success = false;
-                        response.ErrorMessage.Add(1);
-                        return response;
-                    }
+                //Save the changes
+                if (_context.SaveChanges() > 0)
+                {
+                    //Message was saved correctly
+                    response.Success = true;
+                    response.Data = _context.User.Where(x => x.UserName == user.UserName).First().UserID;
+                    return response;
                 }
                 else
                 {
+                    //Message was not saved correctly
                     response.Success = false;
-                    response.ErrorMessage.Add(5);
+                    response.ErrorMessage.Add(1);
                     return response;
                 }
             }
@@ -272,6 +262,69 @@ namespace FestivalApplication.Controllers
             {
                 response.Success = false;
                 response.ErrorMessage.Add(1);
+                return response;
+            }
+        }
+
+        // DELETE
+        [HttpDelete("{UserID}")]
+        public Response<string> Delete(int UserID)
+        {
+            //Create a new response
+            Response<string> response = new Response<string>();
+            try
+            {
+                //Validate the authentication key
+                AuthenticateKey auth = new AuthenticateKey();
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
+                {
+                    //Validate that the user exists
+                    User user = _context.User.Find(UserID);
+                    if (user == null)
+                    {
+                        response.InvalidData();
+                        return response;
+                    }
+
+                    //Validate that the person deleting the user is either the user, or an admin
+                    if(!_context.Authentication.Any(x=> x.AuthenticationKey == Request.Headers["Authorization"] && x.User == user) || !_context.Authentication.Any(x => x.AuthenticationKey == Request.Headers["Authorization"] && x.User.Role == "admin"))
+                    {
+                        response.InvalidOperation();
+                        return response;
+                    }
+
+                    //Validate that the user is not in any stages
+                    if (_context.UserActivity.Any(x => x.User == user && x.Exit == default))
+                    {
+                        response.InvalidOperation();
+                        return response;
+                    }
+                    
+                    //Delete the UserID
+                    _context.Interaction.RemoveRange(_context.Interaction.Where(x => x.UserActivity.User == user).ToList());
+                    _context.Message.RemoveRange(_context.Message.Where(x => x.UserActivity.User == user).ToList());
+                    _context.UserActivity.RemoveRange(_context.UserActivity.Where(x => x.User == user).ToList());
+                    _context.User.Remove(user);
+                    if (_context.SaveChanges() > 0)
+                    {
+                        response.Success = true;
+                        return response;
+                    }
+                    else
+                    {
+                        response.ServerError();
+                        return response;
+                    }
+                }
+                else
+                {
+                    response.AuthorizationError();
+                    return response;
+                }
+            }
+            catch
+            {
+                response.ServerError();
                 return response;
             }
         }
