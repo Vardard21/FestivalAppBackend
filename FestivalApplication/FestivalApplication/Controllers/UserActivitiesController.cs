@@ -32,7 +32,7 @@ namespace FestivalApplication.Controllers
 
             try {
                 AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //If the stageID is not 0, validate that the StageID exists and the stage is active
                     if (userActivity.StageID != 0)

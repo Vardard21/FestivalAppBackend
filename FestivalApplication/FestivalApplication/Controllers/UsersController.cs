@@ -31,7 +31,7 @@ namespace FestivalApplication.Controllers
             try
             {
                 AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Validate that the requestor is an admin
                     if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
@@ -83,7 +83,7 @@ namespace FestivalApplication.Controllers
             try
             {
                 AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Validate that the requestor is an admin
                     if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
@@ -107,7 +107,7 @@ namespace FestivalApplication.Controllers
                     dto.UserID = user.UserID;
                     dto.UserName = user.UserName;
                     dto.UserRole = user.Role;
-                    List<UserActivity> UserActivities = _context.UserActivity.Where(x => x.User.UserID == id).ToList();
+                    List<UserActivity> UserActivities = _context.UserActivity.Where(x => x.User.UserID == id).Include(x=> x.Stage).ToList();
                     dto.activities = new List<UserActivityWithMessageDto>();
                     foreach (UserActivity activity in UserActivities)
                     {
@@ -152,7 +152,7 @@ namespace FestivalApplication.Controllers
             try
             {
                 AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Validate the role
                     if (changerequest.UserRole == "admin" | changerequest.UserRole == "artist" | changerequest.UserRole == "visitor")
@@ -173,12 +173,13 @@ namespace FestivalApplication.Controllers
                         }
 
                         //Validate that the user changing the role is an admin (through the authentication key)
-                        if(!_context.Authentication.Any(x=>x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                        if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
                         {
                             //User changing the role is not an admin
                             response.InvalidOperation();
                             return response;
                         }
+
                         //Change the role
                         User user = _context.User.Find(changerequest.UserID);
                         user.Role = changerequest.UserRole;
@@ -226,7 +227,7 @@ namespace FestivalApplication.Controllers
             Response<int> response = new Response<int>();
             try {
                 AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Validate that the fields exist
                     if (user.PassWord != null && user.UserName != null)

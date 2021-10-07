@@ -31,7 +31,7 @@ namespace FestivalApplication.Controllers
             try
             {
                 AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Validate LastUpdated date and set default to one hour ago
                     if (historyrequest.LastUpdated < DateTime.UtcNow.AddHours(-1))
@@ -40,7 +40,7 @@ namespace FestivalApplication.Controllers
                     }
 
                     //Check for all messages posted in the stage since the last update date
-                    var MessageHistory = _context.Message.Where(x => x.Timestamp > historyrequest.LastUpdated && x.UserActivity.Stage.StageID == historyrequest.StageID).Include(message => message.UserActivity).ToList();
+                    var MessageHistory = _context.Message.Where(x => x.Timestamp > historyrequest.LastUpdated && x.UserActivity.Stage.StageID == historyrequest.StageID).Include(message => message.UserActivity.User).ToList();
 
                     //Initialize the return list
                     List<MessageSendDto> ChatHistory = new List<MessageSendDto>();
@@ -50,6 +50,7 @@ namespace FestivalApplication.Controllers
                     {
                         //Create a new Send Message Object and fill the text and timestamp
                         MessageSendDto dto = new MessageSendDto();
+                        dto.MessageID = message.MessageID;
                         dto.MessageText = message.MessageText;
                         dto.Timestamp = message.Timestamp;
                         //Find the author by UserID and assign the UserName and UserRole
@@ -86,7 +87,7 @@ namespace FestivalApplication.Controllers
 
             try {
                 AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Create a new message to transfer the message data into
                     Message message = new Message();

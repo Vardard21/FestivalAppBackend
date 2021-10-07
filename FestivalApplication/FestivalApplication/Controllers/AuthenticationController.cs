@@ -97,7 +97,7 @@ namespace FestivalApplication.Controllers
             try
             {
                 AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Check for existing authkeys
                     if (_context.Authentication.Any(x => x.User.UserID == userid))
