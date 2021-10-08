@@ -9,16 +9,18 @@ namespace FestivalApplication.Model
 {
     public class AuthenticateKey
     {
-        private Boolean test = false;
+        private Boolean test = true;
 
         public Boolean Authenticate(DBContext context, string Key)
         {
+                context.Authentication.RemoveRange(context.Authentication.Where(x => x.CurrentExpiryDate > DateTime.UtcNow));
+                context.Penalty.RemoveRange(context.Penalty.Where(x => x.EndTime < DateTime.UtcNow));
             if (test)
             {
                 return true;
-            } else
+            }
+            else
             {
-                context.Authentication.RemoveRange(context.Authentication.Where(x => x.CurrentExpiryDate > DateTime.UtcNow));
                 if (context.Authentication.Any(x => x.AuthenticationKey == Key))
                 {
                     Authentication auth = context.Authentication.Where(x => x.AuthenticationKey == Key).FirstOrDefault();

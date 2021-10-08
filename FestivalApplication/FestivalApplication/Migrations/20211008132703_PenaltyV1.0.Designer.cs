@@ -9,15 +9,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FestivalApplication.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20211005133853_Initial")]
-    partial class Initial
+    [Migration("20211008132703_PenaltyV1.0")]
+    partial class PenaltyV10
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.9");
+                .HasAnnotation("ProductVersion", "5.0.10");
 
             modelBuilder.Entity("FestivalApplication.Model.Authentication", b =>
                 {
@@ -144,6 +144,38 @@ namespace FestivalApplication.Migrations
                     b.ToTable("MusicListActivity");
                 });
 
+            modelBuilder.Entity("FestivalApplication.Model.Penalty", b =>
+                {
+                    b.Property<int>("PenaltyID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("AdminID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime");
+
+                    b.Property<int>("PenaltyType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StageID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("PenaltyID");
+
+                    b.ToTable("Penalty");
+                });
+
             modelBuilder.Entity("FestivalApplication.Model.Stage", b =>
                 {
                     b.Property<int>("StageID")
@@ -192,6 +224,9 @@ namespace FestivalApplication.Migrations
 
                     b.Property<int>("OrderNumber")
                         .HasColumnType("int");
+
+                    b.Property<bool>("Playing")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("TrackID")
                         .HasColumnType("int");

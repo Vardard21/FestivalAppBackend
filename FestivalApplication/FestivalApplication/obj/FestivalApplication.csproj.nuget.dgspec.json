@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {}
+    "C:\\Users\\theuvel\\Localfolder\\BackEndFestival\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {}
   },
   "projects": {
-    "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {
+    "C:\\Users\\theuvel\\Localfolder\\BackEndFestival\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
+        "projectUniqueName": "C:\\Users\\theuvel\\Localfolder\\BackEndFestival\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
         "projectName": "FestivalApplication",
-        "projectPath": "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
-        "packagesPath": "C:\\Users\\yaniv\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\obj\\",
+        "projectPath": "C:\\Users\\theuvel\\Localfolder\\BackEndFestival\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
+        "packagesPath": "C:\\Users\\theuvel\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\theuvel\\Localfolder\\BackEndFestival\\FestivalApplication\\FestivalApplication\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\yaniv\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\theuvel\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -42,13 +42,13 @@
           "dependencies": {
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
-              "version": "[5.0.9, )"
+              "version": "[5.0.10, )"
             },
             "Microsoft.EntityFrameworkCore.Tools": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[5.0.9, )"
+              "version": "[5.0.10, )"
             },
             "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
               "target": "Package",
@@ -89,7 +89,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.401\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.400\\RuntimeIdentifierGraph.json"
         }
       }
     }

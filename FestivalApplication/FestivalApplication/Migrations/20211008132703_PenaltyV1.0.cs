@@ -4,7 +4,7 @@ using MySql.EntityFrameworkCore.Metadata;
 
 namespace FestivalApplication.Migrations
 {
-    public partial class Initial : Migration
+    public partial class PenaltyV10 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -19,6 +19,25 @@ namespace FestivalApplication.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MusicList", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Penalty",
+                columns: table => new
+                {
+                    PenaltyID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    UserID = table.Column<int>(type: "int", nullable: false),
+                    PenaltyType = table.Column<int>(type: "int", nullable: false),
+                    StageID = table.Column<int>(type: "int", nullable: false),
+                    StartTime = table.Column<DateTime>(type: "datetime", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "datetime", nullable: false),
+                    AdminID = table.Column<int>(type: "int", nullable: false),
+                    Comment = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Penalty", x => x.PenaltyID);
                 });
 
             migrationBuilder.CreateTable(
@@ -99,7 +118,8 @@ namespace FestivalApplication.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     MusicListID = table.Column<int>(type: "int", nullable: false),
                     TrackID = table.Column<int>(type: "int", nullable: false),
-                    OrderNumber = table.Column<int>(type: "int", nullable: false)
+                    OrderNumber = table.Column<int>(type: "int", nullable: false),
+                    Playing = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -262,6 +282,9 @@ namespace FestivalApplication.Migrations
 
             migrationBuilder.DropTable(
                 name: "MusicListActivity");
+
+            migrationBuilder.DropTable(
+                name: "Penalty");
 
             migrationBuilder.DropTable(
                 name: "Track");
