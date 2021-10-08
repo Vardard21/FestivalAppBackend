@@ -13,5 +13,9 @@
     <WebStackScaffolding_IsAsyncSelected>False</WebStackScaffolding_IsAsyncSelected>
     <ShowAllFiles>true</ShowAllFiles>
     <NameOfLastUsedPublishProfile>C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\Properties\PublishProfiles\FestivalApplication20211001092547 - Web Deploy.pubxml</NameOfLastUsedPublishProfile>
+    <ActiveDebugProfile>IIS Express</ActiveDebugProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

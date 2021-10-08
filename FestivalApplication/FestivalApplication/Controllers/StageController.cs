@@ -45,8 +45,6 @@ namespace FestivalApplication.Controllers
                     //create a list of active stages
                     List<StagesRequestDto> ActiveStages = new List<StagesRequestDto>();
 
-                    if (!ActiveStages.Any())
-                    {
 
                         //create a for loop for each stage in stage status
                         foreach (Stage stage in stagesstatus)
@@ -69,12 +67,7 @@ namespace FestivalApplication.Controllers
                         response.Success = true;
                         response.Data = ActiveStages;
                         return response;
-                    }
-                    else
-                    {
-                        response.ServerError();
-                        return response;
-                    }
+
                 }
                 else
                 {
@@ -88,8 +81,6 @@ namespace FestivalApplication.Controllers
                 return response;
             }
         }
-        
-     
 
         // GET: api/<StageController2>
         [HttpGet("{id}")]
@@ -158,7 +149,8 @@ namespace FestivalApplication.Controllers
                 return response;
             }
         }
-        // POST: api/Message
+
+        // POST: api/Stage
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public Response<string> PostStage(StageCreateDto stagecreatedto)
@@ -196,7 +188,14 @@ namespace FestivalApplication.Controllers
                     else
                     {
                         newStage.StageName = stagecreatedto.StageName;
-                        newStage.StageActive = stagecreatedto.StageActive;
+                        if (stagecreatedto.StageName.Any())
+                        {
+                            newStage.StageActive = stagecreatedto.StageActive;
+                        }
+                        else
+                        {
+                            newStage.StageActive = true;
+                        }
                         _context.Stage.Add(newStage);
 
                         if (_context.SaveChanges() > 0)
@@ -226,7 +225,8 @@ namespace FestivalApplication.Controllers
                 return response;
             }
         }
-        // PUT: api/StagesController2/5
+
+        // PUT: api/StagesController/
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
         public Response<string> PutUser(StageUpdateDto changestage)
