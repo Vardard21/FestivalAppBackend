@@ -117,10 +117,7 @@ namespace FestivalApplication.Controllers
             Response<PlaylistUpdateDto> response = new Response<PlaylistUpdateDto>();
             try
             {
-                //checks user authentification
-                AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
-                {
+
                     //check if user is actually an artist 
                     if (_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
                     {
@@ -192,12 +189,7 @@ namespace FestivalApplication.Controllers
 
                     return response;
 
-                }
-                else
-                {
-                    response.AuthorizationError();
-                    return response;
-                }
+
 
             }
             catch
