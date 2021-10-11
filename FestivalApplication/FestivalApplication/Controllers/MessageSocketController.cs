@@ -132,8 +132,9 @@ namespace FestivalApplication.Controllers
                                 if (response.Message.Success)
                                 {
                                     // Find all message posted in the stage in the last 24 hours (limit 100) and count their interactions.
+                                    DateTime Maxdate = DateTime.UtcNow.AddDays(-1); //Must define the max date here separately as entity framework does not allow it to be defined inside the where clause
                                     int StageID = _context.Message.Where(x => x.MessageID == responseObject.MessageID).Include(x => x.UserActivity.Stage).FirstOrDefault().UserActivity.Stage.StageID;
-                                    List<Message> messages = _context.Message.Where(x => x.UserActivity.Stage.StageID == StageID & x.Timestamp > DateTime.UtcNow.AddDays(-1)).Take(100).ToList();
+                                    List<Message> messages = _context.Message.Where(x => x.UserActivity.Stage.StageID == StageID & x.Timestamp > Maxdate).Take(100).ToList();
                                     List<int> InteractionTypes = _context.Interaction.Select(x => x.InteractionType).Distinct().ToList();
                                     List<MessageInteractionsDto> interactions = new List<MessageInteractionsDto>();
                                     foreach (Message message in messages)
