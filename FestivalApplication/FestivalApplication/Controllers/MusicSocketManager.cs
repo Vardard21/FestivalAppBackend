@@ -66,7 +66,7 @@ namespace FestivalApplication.Controllers
                 {
                     RemoveSocket(socket);
                 }
-                if (socket != ParentSocket)
+                if (socket != ParentSocket && track.Success==true)
                 {
                     try
                     {
