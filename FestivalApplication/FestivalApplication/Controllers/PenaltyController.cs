@@ -1,13 +1,12 @@
-﻿using System;
+﻿using FestivalApplication.Data;
+using FestivalApplication.Model;
+using FestivalApplication.Model.DataTransferObjects;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using FestivalApplication.Data;
-using FestivalApplication.Model;
-using FestivalApplication.Model.DataTransferObjects;
 
 
 namespace FestivalApplication.Controllers
@@ -26,69 +25,12 @@ namespace FestivalApplication.Controllers
         // GET: api/Penalty
         [HttpGet]
         public Response<List<PenaltySendDto>> GetPenaltyHistory()
-        {   
-            //creates a response variable to be sent
-            Response<List<PenaltySendDto>> response = new Response<List<PenaltySendDto>>();
-            {
-                //create variable to check expiry of penalty
-                var penaltyhistory = _context.Penalty
-                .ToList();
-
-                
-
-                //create a list of the active penalties for all users
-                List<PenaltySendDto> PenaltyHistory = new List<PenaltySendDto>();
-
-                //only proceed when there are active penalties
-                if (!PenaltyHistory.Any())
-                {
-                    //create a for loop for each penalty in penalty status
-                    foreach (Penalty penalty in penaltyhistory)
-                    {
-                        //Create a new Penalty Send DTO 
-                        PenaltySendDto dto = new PenaltySendDto();
-                        //fill the requested attributes
-                        dto.PenaltyType = penalty.PenaltyType;
-                        dto.Comment = penalty.Comment;
-                        dto.StartTime = penalty.StartTime;
-                        dto.EndTime = penalty.EndTime;
-                        //The bannedstage is not always used, so create if else statement to
-                        //give null when the penalty does not specify a stage
-                        if (penalty.StageID!=default)
-                        {
-                            dto.StageID = penalty.StageID;
-                        }
-                        else
-                        {
-                            dto.StageID = default;
-                        }
-                        //User info is connected through classes
-
-                        dto.Admin = FindAssignedUser(penalty.AdminID);
-                        dto.User = FindAssignedUser(penalty.UserID);
-
-                        //Add the new object to the return list
-                        PenaltyHistory.Add(dto);
-                    }
-
-                }
-
-                response.Success = true;
-                response.Data = PenaltyHistory;
-                return response;
-            }
-        }
-
-        // GET: api/Penalty/5
-        [HttpGet("{id}")]
-        public Response<List<PenaltySendDto>> GetPenaltyHistoryID(int id)
         {
             //creates a response variable to be sent
             Response<List<PenaltySendDto>> response = new Response<List<PenaltySendDto>>();
             {
-                //create variable to check expiry of penalty
+                //create variable to collect history of all penalties
                 var penaltyhistory = _context.Penalty
-                .Where(x=> x.UserID==id)
                 .ToList();
 
 
@@ -136,35 +78,134 @@ namespace FestivalApplication.Controllers
             }
         }
 
+        // GET: api/Penalty/5
+        [HttpGet("{UserID}")]
+        public Response<List<PenaltySendDto>> GetPenaltyHistoryID(int UserID)
+        {
+            //creates a response variable to be sent
+            Response<List<PenaltySendDto>> response = new Response<List<PenaltySendDto>>();
+            {
+                //create variable to check history of all penalties
+                var penaltyhistory = _context.Penalty
+                .Where(x => x.UserID == UserID)
+                .ToList();
+
+                if(penaltyhistory.Count()==0)
+                {
+                    response.InvalidData();
+                    Console.WriteLine("User does not exist");
+                    return response;
+                }
+
+                //create a list of the penalties for all users
+                List<PenaltySendDto> PenaltyHistory = new List<PenaltySendDto>();
+
+                //only proceed when there are active penalties
+                if (!PenaltyHistory.Any())
+                {
+                    //create a for loop for each penalty in penalty status
+                    foreach (Penalty penalty in penaltyhistory)
+                    {
+                        //Create a new Penalty Send DTO 
+                        PenaltySendDto dto = new PenaltySendDto();
+                        //fill the requested attributes
+                        dto.PenaltyType = penalty.PenaltyType;
+                        dto.Comment = penalty.Comment;
+                        dto.StartTime = penalty.StartTime;
+                        dto.EndTime = penalty.EndTime;
+                        //The bannedstage is not always used, so create if else statement to
+                        //give null when the penalty does not specify a stage
+                        if (penalty.StageID != default)
+                        {
+                            dto.StageID = penalty.StageID;
+                        }
+                        else
+                        {
+                            dto.StageID = default;
+                        }
+                        //User info is connected through classes
+
+                        dto.Admin = FindAssignedUser(penalty.AdminID);
+                        dto.User = FindAssignedUser(penalty.UserID);
+
+                        //Add the new object to the return list
+                        PenaltyHistory.Add(dto);
+                    }
+
+                }
+
+                response.Success = true;
+                response.Data = PenaltyHistory;
+                return response;
+            }
+        }
+
         // PUT: api/Penalty/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPenalty(int id, Penalty penalty)
+        [HttpPut]
+        public Response<string> PutPenalty(PenaltyChangeDto changepenalty)
         {
-            if (id != penalty.PenaltyID)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(penalty).State = EntityState.Modified;
-
+            //Create a new response
+            Response<string> response = new Response<string>();
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PenaltyExists(id))
+                AuthenticateKey auth = new AuthenticateKey();
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    return NotFound();
+                    //Validate that the requestor is an admin
+                    if (_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    {
+                        //User changing the role is not an admin
+                        response.InvalidOperation();
+                        return response;
+                    }
+
+                    //Check if the penalty exists
+                    if ((_context.Penalty.Any(x => x.PenaltyID == changepenalty.PenaltyID)))
+                    {
+
+                        //Change the penalty
+                        Penalty penalty = _context.Penalty.Find(changepenalty.PenaltyID);
+                        penalty.PenaltyType = changepenalty.PenaltyType;
+                        penalty.Comment = changepenalty.Comment;
+                        penalty.EndTime = changepenalty.EndTime;
+                        _context.Entry(penalty).State = EntityState.Modified;
+                    
+                        //Save the changes
+                        if (_context.SaveChanges() > 0)
+                        {
+                            //Penalty was updated succesfully
+                            response.Success = true;
+                            return response;
+                        }
+                        else
+                        {
+                            //Error in changing penalty
+                            response.ServerError();
+                            response.Data = "State has not been updated";
+                            return response;
+                        }
+                    }
+                    else
+                    {
+                        //Penalty does not exist
+                        response.Success = false;
+                        response.InvalidData();
+                        response.Data = "Penalty does not exist";
+                        return response;
+                    }
                 }
                 else
                 {
-                    throw;
+                    response.AuthorizationError();
+                    return response;
                 }
             }
-
-            return NoContent();
+        catch
+        {
+            response.ServerError();
+            return response;
+            }
         }
 
         // POST: api/Penalty
@@ -175,7 +216,8 @@ namespace FestivalApplication.Controllers
             //Create a new response with type string
             Response<string> response = new Response<string>();
 
-            try {
+            try
+            {
                 AuthenticateKey auth = new AuthenticateKey();
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
@@ -230,25 +272,31 @@ namespace FestivalApplication.Controllers
 
         // DELETE: api/Penalty/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePenalty(int id)
+        public Response<string> DeletePenalty(int id)
         {
-            var penalty = await _context.Penalty.FindAsync(id);
+            //Create a new response with type string
+            Response<string> response = new Response<string>();
+
+            var penalty = _context.Penalty.Find(id);
             if (penalty == null)
             {
-                return NotFound();
+                response.InvalidData();
+                return response;
             }
 
             _context.Penalty.Remove(penalty);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            return NoContent();
+            response.Success = true;
+            response.Data = "Penalty succesfully deleted";
+            return response;
         }
 
         private bool PenaltyExists(int id)
         {
             return _context.Penalty.Any(e => e.PenaltyID == id);
         }
-        public UserSendDto FindAssignedUser(int id)
+        private UserSendDto FindAssignedUser(int id)
         {
             //create user send dto
             UserSendDto dto = new UserSendDto();
