@@ -370,10 +370,10 @@ namespace FestivalApplication.Controllers
         [Route("api/Stage/all")]
         // GET: api/<StageController>
         [HttpGet]
-        public Response<List<StagesRequestDto>> GetallStages()
+        public Response<List<StagesFullRequestDto>> GetallStages()
         {
             //creates a response variable to be sent
-            Response<List<StagesRequestDto>> response = new Response<List<StagesRequestDto>>();
+            Response<List<StagesFullRequestDto>> response = new Response<List<StagesFullRequestDto>>();
             try
             {
                 AuthenticateKey auth = new AuthenticateKey();
@@ -386,7 +386,7 @@ namespace FestivalApplication.Controllers
 
 
                     //create a list of active stages
-                    List<StagesRequestDto> ActiveStages = new List<StagesRequestDto>();
+                    List<StagesFullRequestDto> ActiveStages = new List<StagesFullRequestDto>();
 
                     if (!ActiveStages.Any())
                     {
@@ -395,9 +395,10 @@ namespace FestivalApplication.Controllers
                         foreach (Stage stage in stagesstatus)
                         {
                             //Create a new Stage Request DTO and fill the id and name
-                            StagesRequestDto dto = new StagesRequestDto();
+                            StagesFullRequestDto dto = new StagesFullRequestDto();
                             dto.StageID = stage.StageID;
                             dto.StageName = stage.StageName;
+                            dto.StageActive = stage.StageActive;
                             //Find the Current Song, temporarily only manually defined
                             dto.CurrentSong = "Thunderstruck by AC/DC";
                             ////Find the amount of active users in the stage
