@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {}
+    "C:\\Users\\yaniv\\Source\\Repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {}
   },
   "projects": {
-    "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {
+    "C:\\Users\\yaniv\\Source\\Repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
+        "projectUniqueName": "C:\\Users\\yaniv\\Source\\Repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
         "projectName": "FestivalApplication",
-        "projectPath": "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
+        "projectPath": "C:\\Users\\yaniv\\Source\\Repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
         "packagesPath": "C:\\Users\\yaniv\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\obj\\",
+        "outputPath": "C:\\Users\\yaniv\\Source\\Repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\yaniv\\AppData\\Roaming\\NuGet\\NuGet.Config",

@@ -54,7 +54,7 @@ namespace FestivalApplication.Controllers
             }
         }
 
-        public async void SendToTrackOtherClients(Response<PlaylistUpdateDto> track, WebSocket ParentSocket)
+        public async void SendToTrackOtherClients(Response<PlaylistUpdateDto> track, WebSocket ParentSocket, int StageID)
         {
             SocketTypeWriter<PlaylistUpdateDto> SocketMessage = new SocketTypeWriter<PlaylistUpdateDto>();
             SocketMessage.MessageType = "IncomingTrack";
