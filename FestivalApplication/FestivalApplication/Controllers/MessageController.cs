@@ -178,6 +178,7 @@ namespace FestivalApplication.Controllers
                     _context.Interaction.RemoveRange(_context.Interaction.Where(x => x.Message == message));
 
                     //Delete the message
+                    _context.Message.Remove(message);
                     if (_context.SaveChanges() > 0)
                     {
                         //Notify the socket of deleted message

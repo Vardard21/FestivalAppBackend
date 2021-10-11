@@ -37,7 +37,7 @@ namespace FestivalApplication
             });
 
             services.AddDbContext<DBContext>(options =>
-                    options.UseMySQL(Configuration.GetConnectionString("Azure")));
+                    options.UseMySQL(Configuration.GetConnectionString("DBContext")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
