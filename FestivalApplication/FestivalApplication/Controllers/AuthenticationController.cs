@@ -93,29 +93,37 @@ namespace FestivalApplication.Controllers
         {
             //Create a new response
             Response<string> response = new Response<string>();
-
             try
             {
                 AuthenticateKey auth = new AuthenticateKey();
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    //Check for existing authkeys
-                    if (_context.Authentication.Any(x => x.User.UserID == userid))
+                    //Check if authkey is from user
+                    if(_context.Authentication.Any(x=> x.AuthenticationKey == Request.Headers["Authorization"] && x.User.UserID == userid))
                     {
-                        if (CloseOffAllUserActivities(userid))
+                        //Check for existing authkeys
+                        if (_context.Authentication.Any(x => x.User.UserID == userid))
                         {
-                            response.Success = true;
-                            return response;
+                            if (CloseOffAllUserActivities(userid))
+                            {
+                                response.Success = true;
+                                return response;
+                            }
+                            else
+                            {
+                                response.ServerError();
+                                return response;
+                            }
                         }
                         else
                         {
-                            response.ServerError();
+                            //No keys were found
+                            response.InvalidOperation();
                             return response;
                         }
-                    }
-                    else
+                    } else
                     {
-                        //No keys were found
+                        //Cannot logout other user
                         response.InvalidOperation();
                         return response;
                     }

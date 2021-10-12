@@ -144,3 +144,7 @@ C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\F
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Release\net5.0\ref\FestivalApplication.dll
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Release\net5.0\FestivalApplication.pdb
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Release\net5.0\FestivalApplication.genruntimeconfig.cache
+C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Release\net5.0\xunit.abstractions.dll
+C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Release\net5.0\xunit.assert.dll
+C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Release\net5.0\xunit.core.dll
+C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Release\net5.0\xunit.execution.dotnet.dll

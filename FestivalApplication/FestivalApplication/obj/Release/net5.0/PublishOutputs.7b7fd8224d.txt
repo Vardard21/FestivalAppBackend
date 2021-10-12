@@ -58,6 +58,10 @@ C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\F
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Release\net5.0\PubTmp\Out\System.IdentityModel.Tokens.Jwt.dll
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Release\net5.0\PubTmp\Out\System.Runtime.Caching.dll
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Release\net5.0\PubTmp\Out\System.Security.Cryptography.ProtectedData.dll
+C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Release\net5.0\PubTmp\Out\xunit.abstractions.dll
+C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Release\net5.0\PubTmp\Out\xunit.assert.dll
+C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Release\net5.0\PubTmp\Out\xunit.core.dll
+C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Release\net5.0\PubTmp\Out\xunit.execution.dotnet.dll
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Release\net5.0\PubTmp\Out\cs\Microsoft.CodeAnalysis.resources.dll
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Release\net5.0\PubTmp\Out\de\Microsoft.CodeAnalysis.resources.dll
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Release\net5.0\PubTmp\Out\es\Microsoft.CodeAnalysis.resources.dll

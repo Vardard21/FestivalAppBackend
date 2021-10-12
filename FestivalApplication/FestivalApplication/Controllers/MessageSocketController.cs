@@ -23,7 +23,6 @@ namespace FestivalApplication.Controllers
     {
         private readonly ILogger<WebSocketsController> _logger;
         private readonly DBContext _context;
-        private List<WebSocket> ActiveSockets = new List<WebSocket>();
 
         public WebSocketsController(ILogger<WebSocketsController> logger, DBContext context)
         {
@@ -133,8 +132,9 @@ namespace FestivalApplication.Controllers
                                 if (response.Message.Success)
                                 {
                                     // Find all message posted in the stage in the last 24 hours (limit 100) and count their interactions.
+                                    DateTime Maxdate = DateTime.UtcNow.AddDays(-1); //Must define the max date here separately as entity framework does not allow it to be defined inside the where clause
                                     int StageID = _context.Message.Where(x => x.MessageID == responseObject.MessageID).Include(x => x.UserActivity.Stage).FirstOrDefault().UserActivity.Stage.StageID;
-                                    List<Message> messages = _context.Message.Where(x => x.UserActivity.Stage.StageID == StageID & x.Timestamp > DateTime.UtcNow.AddDays(-1)).Take(100).ToList();
+                                    List<Message> messages = _context.Message.Where(x => x.UserActivity.Stage.StageID == StageID & x.Timestamp > Maxdate).Take(100).ToList();
                                     List<int> InteractionTypes = _context.Interaction.Select(x => x.InteractionType).Distinct().ToList();
                                     List<MessageInteractionsDto> interactions = new List<MessageInteractionsDto>();
                                     foreach (Message message in messages)
@@ -158,6 +158,39 @@ namespace FestivalApplication.Controllers
                                         }
                                     }
                                     MessageSocketManager.Instance.SendInteractionToOtherClients(interactions);
+                                }
+                            }
+                            catch (Exception exp)
+                            {
+                                //Send back a response with the exception
+                                Response<System.Exception> response = new Response<System.Exception>();
+                                response.ServerError();
+                                response.Data = exp;
+                                //Serialize the object and encode the object into an array of bytes
+                                var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                                //Send the message back to the Frontend through the webSocket
+                                await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                            }
+                            break;
+                        case "DeleteMessage":
+                            try
+                            {
+                                int responseObject = JsonConvert.DeserializeObject<MessageIDReaderDto>(received).MessageID;
+
+                                SocketTypeWriter<Response<string>> response = new SocketTypeWriter<Response<string>>();
+                                response.MessageType = "DeleteResponse";
+                                response.Message = DeleteMessage(responseObject);
+                                //Process the Interaction and handle the response
+                                if (response != null)
+                                {
+                                    //Serialize the object and encode the object into an array of bytes
+                                    var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                                    //Send the message back to the Frontend through the webSocket
+                                    await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                                }
+                                if (response.Message.Success)
+                                {                                    
+                                    MessageSocketManager.Instance.SendDeleteNotificationToClients(responseObject);
                                 }
                             }
                             catch (Exception exp)
@@ -286,14 +319,14 @@ namespace FestivalApplication.Controllers
             try
             {
                 //Find the corresponding user activity and message
-                UserActivity activity = _context.UserActivity.Where(x => x.User.UserID == Inputdto.UserID & x.Exit == default).Include(x => x.User).FirstOrDefault();
+                UserActivity activity = _context.UserActivity.Where(x => x.User.UserID == Inputdto.UserID && x.Exit == default).Include(x => x.User).FirstOrDefault();
                 Message message = _context.Message.Find(Inputdto.MessageID);
 
                 //Check if activity and message exist
                 if(message != null & activity != null)
                 {
                     //Find any previous interactions from the same user on the same message
-                    var InteractionGiven = _context.Interaction.Where(x => x.Message == message & x.UserActivity.User == activity.User).FirstOrDefault();
+                    var InteractionGiven = _context.Interaction.Where(x => x.Message == message && x.UserActivity.User == activity.User).FirstOrDefault();
 
                     if (InteractionGiven == null)
                     {
@@ -378,6 +411,36 @@ namespace FestivalApplication.Controllers
                 }
             }
             catch
+            {
+                response.ServerError();
+                return response;
+            }
+        }
+
+        private Response<string> DeleteMessage(int MessageID)
+        {
+            Response<string> response = new Response<string>();
+
+            //Validate that the message exists
+            Message message = _context.Message.Find(MessageID);
+            if (message == null)
+            {
+                response.InvalidData();
+                return response;
+            }
+
+            //Remove any interactions
+            _context.Interaction.RemoveRange(_context.Interaction.Where(x => x.Message == message));
+
+            //Delete the message
+            if (_context.SaveChanges() > 0)
+            {
+                //Notify the socket of deleted message
+                MessageSocketManager.Instance.SendDeleteNotificationToClients(MessageID);
+                response.Success = true;
+                return response;
+            }
+            else
             {
                 response.ServerError();
                 return response;

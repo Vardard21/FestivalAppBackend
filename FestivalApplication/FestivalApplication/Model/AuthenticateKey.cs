@@ -21,6 +21,11 @@ namespace FestivalApplication.Model
             }
             else
             {
+<<<<<<< HEAD
+=======
+                context.Authentication.RemoveRange(context.Authentication.Where(x => x.CurrentExpiryDate < DateTime.UtcNow));
+                context.SaveChanges();
+>>>>>>> master
                 if (context.Authentication.Any(x => x.AuthenticationKey == Key))
                 {
                     Authentication auth = context.Authentication.Where(x => x.AuthenticationKey == Key).FirstOrDefault();
@@ -41,8 +46,6 @@ namespace FestivalApplication.Model
                     return false;
                 }
             }
-
         }
-
     }
 }

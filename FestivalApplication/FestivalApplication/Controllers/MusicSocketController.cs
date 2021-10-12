@@ -52,42 +52,64 @@ namespace FestivalApplication.Controllers
             var buffer = new byte[4 * 1024];
             //Recieve the incoming URL and place the individual bytes into the buffer
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            _logger.Log(LogLevel.Information, "New song received from Client");
-            
 
-            //Enter a while loop for as long as the connection is not closed
-            while (!result.CloseStatus.HasValue)
+            Authentication key = JsonConvert.DeserializeObject<Authentication>(Encoding.UTF8.GetString(buffer));
+            AuthenticateKey auth = new AuthenticateKey();
+            if (true/*!auth.Authenticate(_context, key.AuthenticationKey)*/)
             {
-                
-                //Recieve the incoming TrackID and place the individual bytes into the buffer
-                result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                string received = Encoding.UTF8.GetString(buffer);
-
-                //convert byte array to json
-                var incomingjson =JsonConvert.DeserializeObject<PlaylistReceiveDto>(received);
+                MusicSocketManager.Instance.AddSocket(webSocket);
+                if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                {
+                    var encodedmusiclists = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(GetTracks()));
+                    await webSocket.SendAsync(new ArraySegment<byte>(encodedmusiclists, 0, encodedmusiclists.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
 
 
+                    //Enter a while loop for as long as the connection is not closed
+                    while (!result.CloseStatus.HasValue)
+                    {
+                        //Recieve the incoming TrackID and place the individual bytes into the buffer
+                        result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                        string received = Encoding.UTF8.GetString(buffer);
+                        try
+                        {
+                            //convert byte array to json
+                            var incomingjson = JsonConvert.DeserializeObject<PlaylistReceiveDto>(received);
 
-                int receivedint1 =incomingjson.TrackID;
-                int receivedint2 =incomingjson.PlaylistID;
+                            //Serialize the object and encode the object into an array of bytes
+                            var responseMsg = SelectNewTrack(incomingjson.TrackID, incomingjson.PlaylistID);
+                            var encodedresponseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(responseMsg));
+                            //Send the message back to the Frontend through the webSocket
+                            await webSocket.SendAsync(new ArraySegment<byte>(encodedresponseMsg, 0, encodedresponseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
 
-                //Serialize the object and encode the object into an array of bytes
-                var responseMsg = SelectNewTrack(receivedint1, receivedint2);
-                var encodedresponseMsg= Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(responseMsg));
-                //Send the message back to the Frontend through the webSocket
-                await webSocket.SendAsync(new ArraySegment<byte>(encodedresponseMsg, 0, encodedresponseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                            if (responseMsg != null)
+                            {
+                                MusicSocketManager.Instance.SendToTrackOtherClients(responseMsg, webSocket);
+                            }
 
-                if (responseMsg!=null)
-                { 
-                    MusicSocketManager.Instance.SendToTrackOtherClients(responseMsg, webSocket);
+                            //Empty the buffer
+                        }
+                        catch (Exception exp)
+                        {
+                            //Send back a response with the exception
+                            Response<System.Exception> response = new Response<System.Exception>();
+                            response.ServerError();
+                            response.Data = exp;
+                            //Serialize the object and encode the object into an array of bytes
+                            var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                            //Send the message back to the Frontend through the webSocket
+                            await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                        }
+                    }
                 }
-
-                //Empty the buffer
-                buffer = new byte[4 * 1024];
-
-            }
-            //Close the connection when requested
-            MusicSocketManager.Instance.RemoveSocket(webSocket);
+                else
+                {
+                    while (!result.CloseStatus.HasValue)
+                    {
+                        buffer = new byte[4 * 1024];
+                    }
+                }
+                //Close the connection when requested
+            } MusicSocketManager.Instance.RemoveSocket(webSocket);
         }
         private Response<PlaylistUpdateDto> SelectNewTrack(int id, int musicid)
         {
@@ -95,10 +117,7 @@ namespace FestivalApplication.Controllers
             Response<PlaylistUpdateDto> response = new Response<PlaylistUpdateDto>();
             try
             {
-                //checks user authentification
-                AuthenticateKey auth = new AuthenticateKey();
-                if (!auth.Authenticate(_context, Request.Headers["Authorization"]))
-                {
+
                     //check if user is actually an artist 
                     if (_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
                     {
@@ -129,7 +148,7 @@ namespace FestivalApplication.Controllers
                     }
 
                     //find selected track
-                    var selectedtrack = _context.TrackActivity.Where(x => x.TrackID == id && x.MusicListID==musicid).ToList();
+                    var selectedtrack = _context.TrackActivity.Where(x => x.TrackID == id && x.MusicListID == musicid).ToList();
 
                     //check if selected track only has 1 entry
                     if (selectedtrack.Count() == 1)
@@ -170,12 +189,7 @@ namespace FestivalApplication.Controllers
 
                     return response;
 
-                }
-                else
-                {
-                    response.AuthorizationError();
-                    return response;
-                }
+
 
             }
             catch
@@ -184,6 +198,55 @@ namespace FestivalApplication.Controllers
                 return response;
             }
         }
+        private Response<List<MusicListInfoDto>> GetTracks()
+        {
+            Response<List<MusicListInfoDto>> response = new Response<List<MusicListInfoDto>>();
+            List<MusicListInfoDto> MusicAndTracks = new List<MusicListInfoDto>();
+            try
+            {
+
+
+                var MusicLists = _context.MusicList.ToList();
+                foreach (MusicList musiclist in MusicLists)
+                {
+
+                    //find the list in list activities
+                    var playlist = _context.TrackActivity.Where(x => x.MusicListID == musiclist.ID).ToList();
+
+                    //create a list of tracks
+                    List<PlaylistRequestDto> PlaylistTracks = new List<PlaylistRequestDto>();
+
+                    MusicListInfoDto listdto = new MusicListInfoDto();
+                    listdto.ID = musiclist.ID;
+                    listdto.Name = musiclist.ListName;
+
+
+                    foreach (TrackActivity trackactivity in playlist)
+                    {
+
+                        Track track = _context.Track.Find(trackactivity.TrackID);
+                        PlaylistRequestDto dto = new PlaylistRequestDto();
+                        dto.Id = trackactivity.TrackID;
+                        dto.TrackName = track.TrackName;
+                        dto.TrackSource = track.TrackSource;
+                        dto.Length = track.Length;
+                        PlaylistTracks.Add(dto);
+                    }
+
+                    listdto.PlaylistTracks = PlaylistTracks;
+                    MusicAndTracks.Add(listdto);
+                }
+                response.Success = true;
+                response.Data = MusicAndTracks;
+                return response;
+            }
+            catch
+            {
+                response.ServerError();
+                return response;
+            }
+        }
+        
     }
 
 }

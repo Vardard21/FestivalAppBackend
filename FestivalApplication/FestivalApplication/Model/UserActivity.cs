@@ -14,6 +14,7 @@ namespace FestivalApplication.Model
         public DateTime Entry { get; set; }
         public DateTime? Exit { get; set; }
         public List<Message> MessageHistory { get; set; }
+        public List<Interaction> Interactions { get; set; }
 
         public UserActivity()
         {
