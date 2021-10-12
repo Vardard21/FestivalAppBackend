@@ -260,29 +260,41 @@ namespace FestivalApplication.Controllers
                 {
                     if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
                     {
-
-                        //creates a response variable to be sent
-                        Penalty newPenalty = new Penalty();
-                        newPenalty.PenaltyType = penaltyreceivedto.PenaltyType;
-                        newPenalty.AdminID = penaltyreceivedto.AdminID;
-                        newPenalty.StageID = penaltyreceivedto.StageID;
-                        newPenalty.UserID = penaltyreceivedto.UserID;
-                        newPenalty.Comment = penaltyreceivedto.Comment;
-                        newPenalty.StartTime = DateTime.UtcNow;
-                        newPenalty.EndTime = DateTime.UtcNow.AddMinutes(15); ;
-                        _context.Penalty.Add(newPenalty);
-                        if (_context.SaveChanges() > 0)
+                        //Check if the user exists
+                        if ((_context.User.Any(x => x.UserID == penaltyreceivedto.UserID)))
                         {
-                            //Message was saved correctly
-                            response.Success = true;
-                            response.Data = "Penalty succesfully applied";
-                            return response;
+
+                            //creates a response variable to be sent
+                            Penalty newPenalty = new Penalty();
+                            newPenalty.PenaltyType = penaltyreceivedto.PenaltyType;
+                            newPenalty.AdminID = penaltyreceivedto.AdminID;
+                            newPenalty.StageID = penaltyreceivedto.StageID;
+                            newPenalty.UserID = penaltyreceivedto.UserID;
+                            newPenalty.Comment = penaltyreceivedto.Comment;
+                            newPenalty.StartTime = DateTime.UtcNow;
+                            newPenalty.EndTime = DateTime.UtcNow.AddMinutes(15); ;
+                            _context.Penalty.Add(newPenalty);
+                            if (_context.SaveChanges() > 0)
+                            {
+                                //Penalty was saved correctly
+                                response.Success = true;
+                                response.Data = "Penalty succesfully applied";
+                                return response;
+                            }
+                            else
+                            {
+                                //Penalty was not saved correctly
+                                response.ServerError();
+                                response.Data = "Penalty failed to apply";
+                                return response;
+                            }
                         }
                         else
                         {
-                            //Message was not saved correctly
-                            response.ServerError();
-                            response.Data = "Penalty failed to apply";
+                            //User does not exist
+                            response.Success = false;
+                            response.InvalidData();
+                            response.Data = "User does not exist";
                             return response;
                         }
                     }
