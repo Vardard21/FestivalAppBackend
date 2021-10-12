@@ -240,6 +240,10 @@ namespace FestivalApplication.Controllers
                     NewUser.PassWord = user.PassWord;
                     NewUser.Role = "visitor";
                     _context.User.Add(NewUser);
+                } else
+                {
+                    response.InvalidData();
+                    return response;
                 }
 
                 //Save the changes
@@ -287,32 +291,33 @@ namespace FestivalApplication.Controllers
                     }
 
                     //Validate that the person deleting the user is either the user, or an admin
-                    if(!_context.Authentication.Any(x=> x.AuthenticationKey == Request.Headers["Authorization"] && x.User == user) || !_context.Authentication.Any(x => x.AuthenticationKey == Request.Headers["Authorization"] && x.User.Role == "admin"))
+                    if (_context.Authentication.Any(x => x.AuthenticationKey == Request.Headers["Authorization"] && x.User == user) | _context.Authentication.Any(x => x.AuthenticationKey == Request.Headers["Authorization"] && x.User.Role == "admin"))
                     {
-                        response.InvalidOperation();
-                        return response;
-                    }
+                        //Validate that the user is not in any stages
+                        if (_context.UserActivity.Any(x => x.User == user && x.Exit == default))
+                        {
+                            response.InvalidOperation();
+                            return response;
+                        }
 
-                    //Validate that the user is not in any stages
-                    if (_context.UserActivity.Any(x => x.User == user && x.Exit == default))
+                        //Delete the UserID
+                        _context.Interaction.RemoveRange(_context.Interaction.Where(x => x.UserActivity.User == user).ToList());
+                        _context.Message.RemoveRange(_context.Message.Where(x => x.UserActivity.User == user).ToList());
+                        _context.UserActivity.RemoveRange(_context.UserActivity.Where(x => x.User == user).ToList());
+                        _context.User.Remove(user);
+                        if (_context.SaveChanges() > 0)
+                        {
+                            response.Success = true;
+                            return response;
+                        }
+                        else
+                        {
+                            response.ServerError();
+                            return response;
+                        }
+                    } else
                     {
                         response.InvalidOperation();
-                        return response;
-                    }
-                    
-                    //Delete the UserID
-                    _context.Interaction.RemoveRange(_context.Interaction.Where(x => x.UserActivity.User == user).ToList());
-                    _context.Message.RemoveRange(_context.Message.Where(x => x.UserActivity.User == user).ToList());
-                    _context.UserActivity.RemoveRange(_context.UserActivity.Where(x => x.User == user).ToList());
-                    _context.User.Remove(user);
-                    if (_context.SaveChanges() > 0)
-                    {
-                        response.Success = true;
-                        return response;
-                    }
-                    else
-                    {
-                        response.ServerError();
                         return response;
                     }
                 }
