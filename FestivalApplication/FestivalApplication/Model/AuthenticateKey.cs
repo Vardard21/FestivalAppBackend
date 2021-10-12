@@ -9,7 +9,7 @@ namespace FestivalApplication.Model
 {
     public class AuthenticateKey
     {
-        private Boolean test = true;
+        private Boolean test = false;
 
         public Boolean Authenticate(DBContext context, string Key)
         {
