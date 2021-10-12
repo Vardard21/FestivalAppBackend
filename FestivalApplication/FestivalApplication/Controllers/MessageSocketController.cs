@@ -319,14 +319,14 @@ namespace FestivalApplication.Controllers
             try
             {
                 //Find the corresponding user activity and message
-                UserActivity activity = _context.UserActivity.Where(x => x.User.UserID == Inputdto.UserID & x.Exit == default).Include(x => x.User).FirstOrDefault();
+                UserActivity activity = _context.UserActivity.Where(x => x.User.UserID == Inputdto.UserID && x.Exit == default).Include(x => x.User).FirstOrDefault();
                 Message message = _context.Message.Find(Inputdto.MessageID);
 
                 //Check if activity and message exist
                 if(message != null & activity != null)
                 {
                     //Find any previous interactions from the same user on the same message
-                    var InteractionGiven = _context.Interaction.Where(x => x.Message == message & x.UserActivity.User == activity.User).FirstOrDefault();
+                    var InteractionGiven = _context.Interaction.Where(x => x.Message == message && x.UserActivity.User == activity.User).FirstOrDefault();
 
                     if (InteractionGiven == null)
                     {
