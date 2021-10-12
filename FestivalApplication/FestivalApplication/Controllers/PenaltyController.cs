@@ -28,52 +28,69 @@ namespace FestivalApplication.Controllers
         {
             //creates a response variable to be sent
             Response<List<PenaltySendDto>> response = new Response<List<PenaltySendDto>>();
+            try
             {
-                //create variable to collect history of all penalties
-                var penaltyhistory = _context.Penalty
-                .ToList();
-
-
-
-                //create a list of the active penalties for all users
-                List<PenaltySendDto> PenaltyHistory = new List<PenaltySendDto>();
-
-                //only proceed when there are active penalties
-                if (!PenaltyHistory.Any())
+                AuthenticateKey auth = new AuthenticateKey();
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    //create a for loop for each penalty in penalty status
-                    foreach (Penalty penalty in penaltyhistory)
+                    //Validate that the requestor is an admin
+                    if (_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
                     {
-                        //Create a new Penalty Send DTO 
-                        PenaltySendDto dto = new PenaltySendDto();
-                        //fill the requested attributes
-                        dto.PenaltyType = penalty.PenaltyType;
-                        dto.Comment = penalty.Comment;
-                        dto.StartTime = penalty.StartTime;
-                        dto.EndTime = penalty.EndTime;
-                        //The bannedstage is not always used, so create if else statement to
-                        //give null when the penalty does not specify a stage
-                        if (penalty.StageID != default)
-                        {
-                            dto.StageID = penalty.StageID;
-                        }
-                        else
-                        {
-                            dto.StageID = default;
-                        }
-                        //User info is connected through classes
-
-                        dto.Admin = FindAssignedUser(penalty.AdminID);
-                        dto.User = FindAssignedUser(penalty.UserID);
-
-                        //Add the new object to the return list
-                        PenaltyHistory.Add(dto);
+                        //User changing the role is not an admin
+                        response.InvalidOperation();
+                        return response;
                     }
+                    //create variable to collect history of all penalties
+                    var penaltyhistory = _context.Penalty
+                    .ToList();
+                    //create a list of the active penalties for all users
+                    List<PenaltySendDto> PenaltyHistory = new List<PenaltySendDto>();
 
+                    //only proceed when there are active penalties
+                    if (!PenaltyHistory.Any())
+                    {
+                        //create a for loop for each penalty in penalty status
+                        foreach (Penalty penalty in penaltyhistory)
+                        {
+                            //Create a new Penalty Send DTO 
+                            PenaltySendDto dto = new PenaltySendDto();
+                            //fill the requested attributes
+                            dto.PenaltyType = penalty.PenaltyType;
+                            dto.Comment = penalty.Comment;
+                            dto.StartTime = penalty.StartTime;
+                            dto.EndTime = penalty.EndTime;
+                            //The bannedstage is not always used, so create if else statement to
+                            //give null when the penalty does not specify a stage
+                            if (penalty.StageID != default)
+                            {
+                                dto.StageID = penalty.StageID;
+                            }
+                            else
+                            {
+                                dto.StageID = default;
+                            }
+                            //User info is connected through classes
+
+                            dto.Admin = FindAssignedUser(penalty.AdminID);
+                            dto.User = FindAssignedUser(penalty.UserID);
+
+                            //Add the new object to the return list
+                            PenaltyHistory.Add(dto);
+                        }
+                    }
+                    response.Success = true;
+                    response.Data = PenaltyHistory;
+                    return response;
                 }
-
-                response.Success = true;
-                response.Data = PenaltyHistory;
+                else
+                {
+                    response.AuthorizationError();
+                    return response;
+                }
+            }
+            catch
+            {
+                response.ServerError();
                 return response;
             }
         }
@@ -84,58 +101,78 @@ namespace FestivalApplication.Controllers
         {
             //creates a response variable to be sent
             Response<List<PenaltySendDto>> response = new Response<List<PenaltySendDto>>();
+            try
             {
-                //create variable to check history of all penalties
-                var penaltyhistory = _context.Penalty
-                .Where(x => x.UserID == UserID)
-                .ToList();
-
-                if(penaltyhistory.Count()==0)
+                AuthenticateKey auth = new AuthenticateKey();
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    response.InvalidData();
-                    Console.WriteLine("User does not exist");
-                    return response;
-                }
-
-                //create a list of the penalties for all users
-                List<PenaltySendDto> PenaltyHistory = new List<PenaltySendDto>();
-
-                //only proceed when there are active penalties
-                if (!PenaltyHistory.Any())
-                {
-                    //create a for loop for each penalty in penalty status
-                    foreach (Penalty penalty in penaltyhistory)
+                    //Validate that the requestor is an admin
+                    if (_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
                     {
-                        //Create a new Penalty Send DTO 
-                        PenaltySendDto dto = new PenaltySendDto();
-                        //fill the requested attributes
-                        dto.PenaltyType = penalty.PenaltyType;
-                        dto.Comment = penalty.Comment;
-                        dto.StartTime = penalty.StartTime;
-                        dto.EndTime = penalty.EndTime;
-                        //The bannedstage is not always used, so create if else statement to
-                        //give null when the penalty does not specify a stage
-                        if (penalty.StageID != default)
-                        {
-                            dto.StageID = penalty.StageID;
-                        }
-                        else
-                        {
-                            dto.StageID = default;
-                        }
-                        //User info is connected through classes
+                        //User changing the role is not an admin
+                        response.InvalidOperation();
+                        return response;
+                    }
+                        //create variable to check history of all penalties
+                        var penaltyhistory = _context.Penalty
+                        .Where(x => x.UserID == UserID)
+                        .ToList();
 
-                        dto.Admin = FindAssignedUser(penalty.AdminID);
-                        dto.User = FindAssignedUser(penalty.UserID);
-
-                        //Add the new object to the return list
-                        PenaltyHistory.Add(dto);
+                    if (penaltyhistory.Count() == 0)
+                    {
+                        response.InvalidData();
+                        Console.WriteLine("User does not exist");
+                        return response;
                     }
 
-                }
+                    //create a list of the penalties for all users
+                    List<PenaltySendDto> PenaltyHistory = new List<PenaltySendDto>();
 
-                response.Success = true;
-                response.Data = PenaltyHistory;
+                    //only proceed when there are active penalties
+                    if (!PenaltyHistory.Any())
+                    {
+                        //create a for loop for each penalty in penalty status
+                        foreach (Penalty penalty in penaltyhistory)
+                        {
+                            //Create a new Penalty Send DTO 
+                            PenaltySendDto dto = new PenaltySendDto();
+                            //fill the requested attributes
+                            dto.PenaltyType = penalty.PenaltyType;
+                            dto.Comment = penalty.Comment;
+                            dto.StartTime = penalty.StartTime;
+                            dto.EndTime = penalty.EndTime;
+                            //The bannedstage is not always used, so create if else statement to
+                            //give null when the penalty does not specify a stage
+                            if (penalty.StageID != default)
+                            {
+                                dto.StageID = penalty.StageID;
+                            }
+                            else
+                            {
+                                dto.StageID = default;
+                            }
+                            //User info is connected through classes
+
+                            dto.Admin = FindAssignedUser(penalty.AdminID);
+                            dto.User = FindAssignedUser(penalty.UserID);
+
+                            //Add the new object to the return list
+                            PenaltyHistory.Add(dto);
+                        }
+                    }
+                    response.Success = true;
+                    response.Data = PenaltyHistory;
+                    return response;
+                    }
+                else
+                { 
+                    response.AuthorizationError();
+                    return response;
+                }
+            }
+            catch
+            {
+                response.ServerError();
                 return response;
             }
         }
@@ -170,7 +207,7 @@ namespace FestivalApplication.Controllers
                         penalty.Comment = changepenalty.Comment;
                         penalty.EndTime = changepenalty.EndTime;
                         _context.Entry(penalty).State = EntityState.Modified;
-                    
+
                         //Save the changes
                         if (_context.SaveChanges() > 0)
                         {
@@ -201,10 +238,10 @@ namespace FestivalApplication.Controllers
                     return response;
                 }
             }
-        catch
-        {
-            response.ServerError();
-            return response;
+            catch
+            {
+                response.ServerError();
+                return response;
             }
         }
 
@@ -277,19 +314,46 @@ namespace FestivalApplication.Controllers
             //Create a new response with type string
             Response<string> response = new Response<string>();
 
-            var penalty = _context.Penalty.Find(id);
-            if (penalty == null)
+            try
             {
-                response.InvalidData();
+                AuthenticateKey auth = new AuthenticateKey();
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
+                {
+                    if (!_context.Authentication.Any(x => x.User.Role == "admin" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    {
+                        var penalty = _context.Penalty.Find(id);
+                        if (penalty == null)
+                        {
+                            response.InvalidData();
+                            return response;
+                        }
+
+                        _context.Penalty.Remove(penalty);
+                        _context.SaveChanges();
+
+                        response.Success = true;
+                        response.Data = "Penalty succesfully deleted";
+                        return response;
+                    }
+                    else
+                    {
+                        response.InvalidOperation();
+                        response.Data = "User is not an admin";
+                        return response;
+                    }
+                }            
+                else
+                {
+                    response.AuthorizationError();
+                    return response;
+                }
+            }
+            catch
+            {
+                response.ServerError();
+                response.Data = "Failed to connect to database";
                 return response;
             }
-
-            _context.Penalty.Remove(penalty);
-            _context.SaveChanges();
-
-            response.Success = true;
-            response.Data = "Penalty succesfully deleted";
-            return response;
         }
 
         private bool PenaltyExists(int id)
@@ -307,7 +371,6 @@ namespace FestivalApplication.Controllers
             dto.UserName = user.UserName;
             dto.UserRole = user.Role;
             return dto;
-
         }
     }
 }
