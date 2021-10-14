@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\rgass\\Local Folder\\FestivalApp\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {}
+    "C:\\Users\\theuvel\\Localfolder\\BackEndFestival\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {}
   },
   "projects": {
-    "C:\\Users\\rgass\\Local Folder\\FestivalApp\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {
+    "C:\\Users\\theuvel\\Localfolder\\BackEndFestival\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\rgass\\Local Folder\\FestivalApp\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
+        "projectUniqueName": "C:\\Users\\theuvel\\Localfolder\\BackEndFestival\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
         "projectName": "FestivalApplication",
-        "projectPath": "C:\\Users\\rgass\\Local Folder\\FestivalApp\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
-        "packagesPath": "C:\\Users\\rgass\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\rgass\\Local Folder\\FestivalApp\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\obj\\",
+        "projectPath": "C:\\Users\\theuvel\\Localfolder\\BackEndFestival\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
+        "packagesPath": "C:\\Users\\theuvel\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\theuvel\\Localfolder\\BackEndFestival\\FestivalApplication\\FestivalApplication\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\rgass\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\theuvel\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
