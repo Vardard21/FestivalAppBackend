@@ -19,27 +19,28 @@ namespace FestivalApplication.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class MusicSocketController : ControllerBase
+    public class StageSocketController : ControllerBase
     {
         //create a logger and a context
-        private readonly ILogger<MusicSocketController> _logger;
+        private readonly ILogger<StageSocketController> _logger;
         private readonly DBContext _context;
 
-        public MusicSocketController(ILogger<MusicSocketController> logger, DBContext context)
+        public StageSocketController(ILogger<StageSocketController> logger, DBContext context)
         {
             //assign the logger and the context
             _logger = logger;
             _context = context;
         }
 
-        [HttpGet("/ws/{StageID}")]
-        public async Task Get(int StageID)
+        [HttpGet("/ws/{stageID}")]
+        public async Task Get(int stageID)
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 //open a socket and add an instance to the list of sockets
+                Stage stage = _context.Stage.Find(stageID);
                 using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                MusicSocketManager.Instance.AddSocket(webSocket);
+                StageSocketManager.Instance.AddSocket(webSocket,stage);
                 _logger.Log(LogLevel.Information, "WebSocket connection established");
                 await Echo(webSocket);
             }
@@ -59,10 +60,13 @@ namespace FestivalApplication.Controllers
             //Convert the auth key from byte to string
             Authentication key = JsonConvert.DeserializeObject<Authentication>(Encoding.UTF8.GetString(buffer));
             AuthenticateKey auth = new AuthenticateKey();
+            User user = _context.Authentication.Find(auth).User;
+            Stage stage = _context.UserActivity.Where(x => x.User.UserID == user.UserID && x.Exit == default).FirstOrDefault().Stage;
+
             if (auth.Authenticate(_context, key.AuthenticationKey)) //check if auth key exists in the database
             {
                 //Add a new socket to the instance
-                MusicSocketManager.Instance.AddSocket(webSocket);
+                StageSocketManager.Instance.AddSocket(webSocket,stage);
 
                 //validate if auth key is an artist
                 if (_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"])) 
@@ -99,7 +103,7 @@ namespace FestivalApplication.Controllers
                                 if (responseMsg != null)
                                 {
                                     //Send newly selected song to other clients
-                                    MusicSocketManager.Instance.SendToTrackOtherClients(responseMsg, webSocket,incomingjson.StageID);
+                                    StageSocketManager.Instance.SendToTrackOtherClients(responseMsg, webSocket,stage);
                                 }
                             }
                             catch (Exception exp)
@@ -131,7 +135,7 @@ namespace FestivalApplication.Controllers
 
             }
             //Close the connection when requested
-            MusicSocketManager.Instance.RemoveSocket(webSocket);
+            StageSocketManager.Instance.RemoveSocket(webSocket,stage);
         }
         private Response<PlaylistUpdateDto> SelectNewTrack(int id, int musicid)
         {
