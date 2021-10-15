@@ -525,3 +525,4 @@ C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\F
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\xunit.runner.reporters.netcoreapp10.dll
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\xunit.runner.utility.netcoreapp10.dll
 >>>>>>> FeatureRuben
+C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\libman.json
