@@ -4,7 +4,7 @@ using MySql.EntityFrameworkCore.Metadata;
 
 namespace FestivalApplication.Migrations
 {
-    public partial class Int : Migration
+    public partial class label : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

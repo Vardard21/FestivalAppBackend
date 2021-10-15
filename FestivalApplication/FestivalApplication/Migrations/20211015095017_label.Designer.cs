@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FestivalApplication.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20211007134037_Int")]
-    partial class Int
+    [Migration("20211015095017_label")]
+    partial class label
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

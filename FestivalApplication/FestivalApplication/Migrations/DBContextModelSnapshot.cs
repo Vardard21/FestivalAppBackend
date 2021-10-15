@@ -69,6 +69,25 @@ namespace FestivalApplication.Migrations
                     b.ToTable("Interaction");
                 });
 
+            modelBuilder.Entity("FestivalApplication.Model.LoyaltyPoints", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("LoyaltyPoints");
+                });
+
             modelBuilder.Entity("FestivalApplication.Model.Message", b =>
                 {
                     b.Property<int>("MessageID")
@@ -276,6 +295,15 @@ namespace FestivalApplication.Migrations
                     b.Navigation("Message");
 
                     b.Navigation("UserActivity");
+                });
+
+            modelBuilder.Entity("FestivalApplication.Model.LoyaltyPoints", b =>
+                {
+                    b.HasOne("FestivalApplication.Model.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FestivalApplication.Model.Message", b =>

@@ -40,7 +40,7 @@ namespace FestivalApplication.Controllers
                 //open a socket and add an instance to the list of sockets
                 Stage stage = _context.Stage.Find(stageID);
                 using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                StageSocketManager.Instance.AddSocket(webSocket,stage);
+                StageSocketManager.Instance.AddSocket(webSocket,stage); //Might be able to delete, because line also exists below
                 _logger.Log(LogLevel.Information, "WebSocket connection established");
 
                 //enter a loop for the socket
@@ -63,13 +63,15 @@ namespace FestivalApplication.Controllers
             //Convert the auth key from byte to string
             Authentication key = JsonConvert.DeserializeObject<Authentication>(Encoding.UTF8.GetString(buffer));
             AuthenticateKey auth = new AuthenticateKey();
-
-            //find the user thats connected to the auth key and check in which stage said user is
-            User user = /*_context.Authentication.Find(auth).User;*/_context.User.Find(1);
             Stage stage = _context.Stage.Find(stageID);
 
             if (true/*auth.Authenticate(_context, key.AuthenticationKey)*/) //check if auth key exists in the database
             {
+
+                //find the user thats connected to the auth key and check in which stage said user is
+                User user = /*_context.Authentication.Find(auth).User;*/_context.User.Find(1);
+                
+
                 //Add a new socket to the instance
                 StageSocketManager.Instance.AddSocket(webSocket,stage);
 
