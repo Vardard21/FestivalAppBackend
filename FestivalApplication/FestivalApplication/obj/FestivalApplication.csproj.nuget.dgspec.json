@@ -1,7 +1,6 @@
 {
   "format": 1,
   "restore": {
-<<<<<<< HEAD
     "C:\\Users\\theuvel\\Localfolder\\BackEndFestival\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {}
   },
   "projects": {
@@ -16,22 +15,6 @@
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\theuvel\\AppData\\Roaming\\NuGet\\NuGet.Config",
-=======
-    "C:\\Users\\rgass\\Local Folder\\FestivalApp\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {}
-  },
-  "projects": {
-    "C:\\Users\\rgass\\Local Folder\\FestivalApp\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "C:\\Users\\rgass\\Local Folder\\FestivalApp\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
-        "projectName": "FestivalApplication",
-        "projectPath": "C:\\Users\\rgass\\Local Folder\\FestivalApp\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\FestivalApplication.csproj",
-        "packagesPath": "C:\\Users\\rgass\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\rgass\\Local Folder\\FestivalApp\\FestivalAppBackend\\FestivalApplication\\FestivalApplication\\obj\\",
-        "projectStyle": "PackageReference",
-        "configFilePaths": [
-          "C:\\Users\\rgass\\AppData\\Roaming\\NuGet\\NuGet.Config",
->>>>>>> master
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -59,13 +42,13 @@
           "dependencies": {
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
-              "version": "[5.0.10, )"
+              "version": "[5.0.9, )"
             },
             "Microsoft.EntityFrameworkCore.Tools": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[5.0.10, )"
+              "version": "[5.0.9, )"
             },
             "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
               "target": "Package",

@@ -7,6 +7,7 @@ namespace FestivalApplication.Model.DataTransferObjects
 {
     public class PlaylistReceiveDto
     {
+        public int StageID { get; set; }
         public int TrackID { get; set; }
         public int PlaylistID { get; set; }
 
