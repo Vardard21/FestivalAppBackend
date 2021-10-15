@@ -50,9 +50,9 @@ namespace FestivalApplication.Controllers
             var buffer = new byte[1024 * 4];
             //Receive the incoming message and place the individual bytes into the buffer
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            Authentication key = JsonConvert.DeserializeObject<Authentication>(Encoding.UTF8.GetString(buffer));
+            MessageSocketStartDto startdto = JsonConvert.DeserializeObject<MessageSocketStartDto>(Encoding.UTF8.GetString(buffer));
             AuthenticateKey auth = new AuthenticateKey();
-           if (auth.Authenticate(_context, key.AuthenticationKey))
+           if (auth.Authenticate(_context, startdto.AuthenticationKey))
             {
                 //Empty the buffer
                 buffer = new byte[1024 * 4];
@@ -61,7 +61,10 @@ namespace FestivalApplication.Controllers
                 //Send the message back to the Frontend through the webSocket
                 await webSocket.SendAsync(new ArraySegment<byte>(AuthConfirm, 0, AuthConfirm.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
 
-                MessageSocketManager.Instance.AddSocket(webSocket);
+                StageWebSocket socket = new StageWebSocket();
+                socket.webSocket = webSocket;
+                socket.stage = _context.Stage.Find(startdto.StageID);
+                MessageSocketManager.Instance.AddSocket(socket);
                 //Enter a while loop for as long as the connection is not closed
                 while (!result.CloseStatus.HasValue)
                 {
@@ -157,7 +160,7 @@ namespace FestivalApplication.Controllers
                                             interactions.Add(dto);
                                         }
                                     }
-                                    MessageSocketManager.Instance.SendInteractionToOtherClients(interactions);
+                                    MessageSocketManager.Instance.SendInteractionToOtherClients(interactions, socket.stage);
                                 }
                             }
                             catch (Exception exp)
@@ -232,15 +235,13 @@ namespace FestivalApplication.Controllers
                     buffer = new byte[1024 * 4];
                 }
                 //Close the connection after exiting the while loop
-                MessageSocketManager.Instance.RemoveSocket(webSocket);
+                MessageSocketManager.Instance.RemoveSocket(socket);
             } else
             {
                 //Confirm to the frontend that the authorization failed and close the connection
                 var AuthConfirm = Encoding.UTF8.GetBytes("Authorization failed, closing the connection");
                 //Send the message back to the Frontend through the webSocket
                 await webSocket.SendAsync(new ArraySegment<byte>(AuthConfirm, 0, AuthConfirm.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
-                //Close the connection
-                MessageSocketManager.Instance.RemoveSocket(webSocket);
             }
 
 

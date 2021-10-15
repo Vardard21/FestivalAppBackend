@@ -1,4 +1,5 @@
-﻿using FestivalApplication.Model.DataTransferObjects;
+﻿using FestivalApplication.Model;
+using FestivalApplication.Model.DataTransferObjects;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace FestivalApplication.Controllers
     {
         private static MessageSocketManager instance = null;
         private static readonly object padlock = new object();
-        private List<WebSocket> ActiveSockets = new List<WebSocket>();
+        private List<StageWebSocket> ActiveSockets = new List<StageWebSocket>();
 
         MessageSocketManager()
         {
@@ -35,16 +36,16 @@ namespace FestivalApplication.Controllers
             }
         }
 
-        public void AddSocket(WebSocket webSocket)
+        public void AddSocket(StageWebSocket socket)
         {
-            ActiveSockets.Add(webSocket);
+            ActiveSockets.Add(socket);
         }
 
-        public async void RemoveSocket(WebSocket webSocket)
+        public async void RemoveSocket(StageWebSocket webSocket)
         {
             try
             {
-                await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing the connection", CancellationToken.None);
+                await webSocket.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing the connection", CancellationToken.None);
                 ActiveSockets.Remove(webSocket);
             }
             catch
@@ -59,13 +60,14 @@ namespace FestivalApplication.Controllers
             SocketMessage.MessageType = "IncomingMessage";
             SocketMessage.Message = Message;
             var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(SocketMessage));
-            foreach (WebSocket socket in ActiveSockets)
+            Stage stage = ActiveSockets.Where(x => x.webSocket == ParentSocket).FirstOrDefault().stage;
+            foreach (StageWebSocket socket in ActiveSockets)
             {
-                if(socket.State == WebSocketState.Open & socket != ParentSocket)
+                if(socket.webSocket.State == WebSocketState.Open && socket.webSocket != ParentSocket && socket.stage == stage)
                 {
                     try
                     {
-                        await socket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                        await socket.webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), WebSocketMessageType.Text, true, CancellationToken.None);
                     }
                     catch
                     {
@@ -75,19 +77,19 @@ namespace FestivalApplication.Controllers
             }
         }
 
-        public async void SendInteractionToOtherClients(List<MessageInteractionsDto> message)
+        public async void SendInteractionToOtherClients(List<MessageInteractionsDto> message, Stage stage)
         {
             SocketTypeWriter<List<MessageInteractionsDto>> SocketMessage = new SocketTypeWriter<List<MessageInteractionsDto>>();
             SocketMessage.MessageType = "InteractionUpdate";
             SocketMessage.Message = message;
             var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(SocketMessage));
-            foreach (WebSocket socket in ActiveSockets)
+            foreach (StageWebSocket socket in ActiveSockets)
             {
-                if (socket.State == WebSocketState.Open)
+                if (socket.webSocket.State == WebSocketState.Open && socket.stage == stage)
                 {
                     try
                     {
-                        await socket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                        await socket.webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), WebSocketMessageType.Text, true, CancellationToken.None);
                     }
                     catch
                     {
@@ -103,13 +105,13 @@ namespace FestivalApplication.Controllers
             SocketMessage.MessageType = "DeletedMessage";
             SocketMessage.Message = MessageID;
             var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(SocketMessage));
-            foreach (WebSocket socket in ActiveSockets)
+            foreach (StageWebSocket socket in ActiveSockets)
             {
-                if (socket.State == WebSocketState.Open)
+                if (socket.webSocket.State == WebSocketState.Open)
                 {
                     try
                     {
-                        await socket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                        await socket.webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), WebSocketMessageType.Text, true, CancellationToken.None);
                     }
                     catch
                     {
