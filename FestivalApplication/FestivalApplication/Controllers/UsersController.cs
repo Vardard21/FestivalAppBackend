@@ -235,11 +235,13 @@ namespace FestivalApplication.Controllers
                         response.InvalidData();
                         return response;
                     }
+
                     User NewUser = new User();
                     NewUser.UserName = user.UserName;
                     NewUser.PassWord = user.PassWord;
                     NewUser.Role = "visitor";
                     _context.User.Add(NewUser);
+
                 } else
                 {
                     response.InvalidData();
