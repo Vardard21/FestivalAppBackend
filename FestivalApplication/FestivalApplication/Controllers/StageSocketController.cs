@@ -32,7 +32,7 @@ namespace FestivalApplication.Controllers
             _context = context;
         }
 
-        [HttpGet("/ws/{stageID}")]
+        [HttpGet("/ws/stage/{stageID}")]
         public async Task Get(int stageID)
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
@@ -42,7 +42,9 @@ namespace FestivalApplication.Controllers
                 using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
                 StageSocketManager.Instance.AddSocket(webSocket,stage);
                 _logger.Log(LogLevel.Information, "WebSocket connection established");
-                await Echo(webSocket);
+
+                //enter a loop for the socket
+                await Echo(webSocket,stageID);
             }
             else
             {
@@ -50,26 +52,29 @@ namespace FestivalApplication.Controllers
             }
         }
 
-        private async Task Echo(WebSocket webSocket)
+        private async Task Echo(WebSocket webSocket,int stageID)
         {
             //Create a buffer in which to store the incoming bytes
             var buffer = new byte[4 * 1024];
+
             //Recieve the incoming Auth-key and place the individual bytes into the buffer
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
             //Convert the auth key from byte to string
             Authentication key = JsonConvert.DeserializeObject<Authentication>(Encoding.UTF8.GetString(buffer));
             AuthenticateKey auth = new AuthenticateKey();
-            User user = _context.Authentication.Find(auth).User;
-            Stage stage = _context.UserActivity.Where(x => x.User.UserID == user.UserID && x.Exit == default).FirstOrDefault().Stage;
 
-            if (auth.Authenticate(_context, key.AuthenticationKey)) //check if auth key exists in the database
+            //find the user thats connected to the auth key and check in which stage said user is
+            User user = /*_context.Authentication.Find(auth).User;*/_context.User.Find(1);
+            Stage stage = _context.Stage.Find(stageID);
+
+            if (true/*auth.Authenticate(_context, key.AuthenticationKey)*/) //check if auth key exists in the database
             {
                 //Add a new socket to the instance
                 StageSocketManager.Instance.AddSocket(webSocket,stage);
 
                 //validate if auth key is an artist
-                if (_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"])) 
+                if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"])) 
                 {
                     //create a list of tracks to be sent
                     var encodedmusiclists = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(GetTracks())); 
@@ -209,10 +214,9 @@ namespace FestivalApplication.Controllers
                     }
                 }
                 else
-                {
-
+                {                    
                     response.InvalidData();
-                    Console.WriteLine("Multiple Playlist found");
+                    response.Data.TrackName="Multiple Playlists found";
                     return response;
                 }
 
@@ -224,7 +228,7 @@ namespace FestivalApplication.Controllers
             catch
             {
                 response.ServerError();
-                Console.WriteLine("Server Error");
+                response.Data.TrackName = "Server Error";
                 return response;
             }
         }
