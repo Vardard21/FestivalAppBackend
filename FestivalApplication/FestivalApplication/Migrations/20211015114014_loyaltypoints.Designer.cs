@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FestivalApplication.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20211011085416_Initial")]
-    partial class Initial
+    [Migration("20211015114014_loyaltypoints")]
+    partial class loyaltypoints
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -69,6 +69,25 @@ namespace FestivalApplication.Migrations
                     b.HasIndex("UserActivityID");
 
                     b.ToTable("Interaction");
+                });
+
+            modelBuilder.Entity("FestivalApplication.Model.LoyaltyPoints", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("LoyaltyPoints");
                 });
 
             modelBuilder.Entity("FestivalApplication.Model.Message", b =>
@@ -278,6 +297,15 @@ namespace FestivalApplication.Migrations
                     b.Navigation("Message");
 
                     b.Navigation("UserActivity");
+                });
+
+            modelBuilder.Entity("FestivalApplication.Model.LoyaltyPoints", b =>
+                {
+                    b.HasOne("FestivalApplication.Model.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FestivalApplication.Model.Message", b =>

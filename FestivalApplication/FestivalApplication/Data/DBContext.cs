@@ -24,6 +24,7 @@ namespace FestivalApplication.Data
         public DbSet<FestivalApplication.Model.MusicList> MusicList { get; set; }
         public DbSet<FestivalApplication.Model.MusicListActivity> MusicListActivity { get; set; }
         public DbSet<FestivalApplication.Model.Interaction> Interaction { get; set; }
+        public DbSet<FestivalApplication.Model.LoyaltyPoints> LoyaltyPoints { get; set; }
 
     }
 }
