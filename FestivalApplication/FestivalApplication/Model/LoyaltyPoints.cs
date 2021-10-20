@@ -9,6 +9,7 @@ namespace FestivalApplication.Model
     {
         public int ID { get; set; }
         public User User { get; set; }
+        public DateTime LastUpdated { get; set; }
         public int Points { get; set; }
     }
 }

@@ -235,13 +235,15 @@ namespace FestivalApplication.Controllers
                         response.InvalidData();
                         return response;
                     }
-
                     User NewUser = new User();
                     NewUser.UserName = user.UserName;
                     NewUser.PassWord = user.PassWord;
                     NewUser.Role = "visitor";
+                    LoyaltyPoints loyaltyPoints = new LoyaltyPoints();
+                    loyaltyPoints.User = NewUser;
+                    loyaltyPoints.LastUpdated = DateTime.UtcNow;
                     _context.User.Add(NewUser);
-
+                    _context.LoyaltyPoints.Add(loyaltyPoints);
                 } else
                 {
                     response.InvalidData();
