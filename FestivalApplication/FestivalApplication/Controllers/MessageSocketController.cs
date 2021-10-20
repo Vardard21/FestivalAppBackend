@@ -348,6 +348,7 @@ namespace FestivalApplication.Controllers
                             dto.Timestamp = interaction.Timestamp;
                             dto.UserName = interaction.UserActivity.User.UserName;
                             dto.Message = new MessageShortDto();
+                            dto.Message.MessageID=message.MessageID;
                             dto.Message.MessageText = interaction.Message.MessageText;
                             dto.Message.Timestamp = interaction.Message.Timestamp;
                             response.Data = dto;
@@ -392,6 +393,7 @@ namespace FestivalApplication.Controllers
                                 dto.Timestamp = InteractionGiven.Timestamp;
                                 dto.UserName = InteractionGiven.UserActivity.User.UserName;
                                 dto.Message = new MessageShortDto();
+                                dto.Message.MessageID = InteractionGiven.Message.MessageID;
                                 dto.Message.MessageText = InteractionGiven.Message.MessageText;
                                 dto.Message.Timestamp = InteractionGiven.Message.Timestamp;
                                 response.Data = dto;

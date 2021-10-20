@@ -67,22 +67,23 @@ namespace FestivalApplication.Controllers
         {
             //creates a response variable to be sent
             Response<LoyaltyPointsDto> response = new Response<LoyaltyPointsDto>();
-            try
-            {
+            //try
+            //{
                 AuthenticateKey auth = new AuthenticateKey();
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Find user with id
-                    User user = _context.User.Find(id);
+                    User loyaltyUser = _context.User.Find(id);
 
-                    //var loyaltyPoints = _context.LoyaltyPoints.Find(user.UserID).ID;
+                    //Find loyaltypoints row assigned to user
+                    LoyaltyPoints loyaltyPoints = _context.LoyaltyPoints.Find(loyaltyUser.UserID);
                     DateTime lastupdated = default;
                     
                     //Create a new loyalty points DTO and fill the id, name and points
                     LoyaltyPointsDto dto = new LoyaltyPointsDto();
-                    dto.UserID = user.UserID;
-                    dto.UserName = user.UserName;
-                    dto.Points = CalculatePoints(user, lastupdated);
+                    dto.UserID = loyaltyUser.UserID;
+                    dto.UserName = loyaltyUser.UserName;
+                    dto.Points = CalculatePoints(loyaltyUser, lastupdated);
 
                     //loyaltyPoints.Points = dto.Points;
                     //_context.Entry(loyaltyPoints).State = EntityState.Modified;
@@ -96,12 +97,12 @@ namespace FestivalApplication.Controllers
                     response.AuthorizationError();
                     return response;
                 }
-            }
-            catch
-            {
-                response.ServerError();
-                return response;
-            }
+            //}
+            //catch
+            //{
+            //    response.ServerError();
+            //    return response;
+            //}
         }
 
         private int CalculatePoints(User user, DateTime lastupdated)

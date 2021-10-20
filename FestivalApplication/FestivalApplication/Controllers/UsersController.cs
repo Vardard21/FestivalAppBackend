@@ -120,6 +120,7 @@ namespace FestivalApplication.Controllers
                         foreach (Message message in messages)
                         {
                             MessageShortDto mdto = new MessageShortDto();
+                            mdto.MessageID = message.MessageID;
                             mdto.MessageText = message.MessageText;
                             mdto.Timestamp = message.Timestamp;
                             uadto.MessageHistory.Add(mdto);
