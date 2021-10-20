@@ -55,17 +55,15 @@ namespace FestivalApplication.Controllers
         private async Task Echo(WebSocket webSocket,int stageID)
         {
             //Create a buffer in which to store the incoming bytes
-            var buffer = new byte[4 * 1024];
-
-            //Recieve the incoming Auth-key and place the individual bytes into the buffer
+            var buffer = new byte[1024 * 4];
+            //Receive the incoming message and place the individual bytes into the buffer
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-
-            //Convert the auth key from byte to string
-            Authentication key = JsonConvert.DeserializeObject<Authentication>(Encoding.UTF8.GetString(buffer));
+            MessageSocketStartDto startdto = JsonConvert.DeserializeObject<MessageSocketStartDto>(Encoding.UTF8.GetString(buffer));
             AuthenticateKey auth = new AuthenticateKey();
-            Stage stage = _context.Stage.Find(stageID);
 
-            if (auth.Authenticate(_context, key.AuthenticationKey)) //check if auth key exists in the database
+                Stage stage = _context.Stage.Find(stageID);
+
+            if (auth.Authenticate(_context, startdto.AuthenticationKey)) //check if auth key exists in the database
             {
                 //find the user thats connected to the auth key and check in which stage said user is
                 User user = _context.Authentication.Find(auth).User;
