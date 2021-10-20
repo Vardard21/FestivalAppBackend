@@ -65,18 +65,17 @@ namespace FestivalApplication.Controllers
             AuthenticateKey auth = new AuthenticateKey();
             Stage stage = _context.Stage.Find(stageID);
 
-            if (true/*auth.Authenticate(_context, key.AuthenticationKey)*/) //check if auth key exists in the database
+            if (auth.Authenticate(_context, key.AuthenticationKey)) //check if auth key exists in the database
             {
-
                 //find the user thats connected to the auth key and check in which stage said user is
-                User user = /*_context.Authentication.Find(auth).User;*/_context.User.Find(1);
+                User user = _context.Authentication.Find(auth).User;
                 
 
                 //Add a new socket to the instance
                 StageSocketManager.Instance.AddSocket(webSocket,stage);
 
                 //validate if auth key is an artist
-                if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"])) 
+                if (_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"])) 
                 {
                     //create a list of tracks to be sent
                     StageSocketWriterDto<List<MusicListInfoDto>> adto = new StageSocketWriterDto<List<MusicListInfoDto>>();
