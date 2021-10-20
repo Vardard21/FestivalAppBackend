@@ -76,7 +76,7 @@ namespace FestivalApplication.Controllers
                     User loyaltyUser = _context.User.Find(id);
 
                     //Find loyaltypoints row assigned to user
-                    LoyaltyPoints loyaltyPoints = _context.LoyaltyPoints.Find(loyaltyUser.UserID);
+                    LoyaltyPoints loyaltyPoints = _context.LoyaltyPoints.Find(loyaltyUser);
                     DateTime lastupdated = default;
                     
                     //Create a new loyalty points DTO and fill the id, name and points

@@ -66,11 +66,12 @@ namespace FestivalApplication.Controllers
 
         public async void SendToTrackOtherClients(Response<PlaylistUpdateDto> track, WebSocket ParentSocket, Stage stage)
         {
-            SocketTypeWriter<PlaylistUpdateDto> SocketMessage = new SocketTypeWriter<PlaylistUpdateDto>();
-            SocketMessage.MessageType = "IncomingTrack";
-            SocketMessage.Message = track.Data;
-            var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(track));
             var StageActiveSockets = ActiveSockets.Where(x => x.stage.StageID == stage.StageID).ToList();
+            StageSocketWriterDto<PlaylistUpdateDto> dto = new StageSocketWriterDto<PlaylistUpdateDto>();
+            dto.StageData = track;
+            dto.StageCase = "IncomingTrack"+" This many sockets: "+StageActiveSockets.Count();
+            var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dto));
+
 
             foreach (StageWebSocket socket in StageActiveSockets)
             {

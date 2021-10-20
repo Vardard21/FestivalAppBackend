@@ -230,7 +230,6 @@ C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\F
 C:\Users\rgass\Local Folder\FestivalApp\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Debug\net5.0\FestivalApplication.genruntimeconfig.cache
 C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\testhost.exe
 C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\testhost.dll
-C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\appsettings.Development.json
 C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\libman.json
 C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\xunit.runner.visualstudio.dotnetcore.testadapter.dll
 C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\xunit.runner.reporters.netcoreapp10.dll
@@ -458,3 +457,5 @@ C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalAppli
 C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Debug\net5.0\ref\FestivalApplication.dll
 C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Debug\net5.0\FestivalApplication.pdb
 C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\obj\Debug\net5.0\FestivalApplication.genruntimeconfig.cache
+C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\appsettings.json
+C:\Users\yaniv\source\repos\FestivalAppBackend\FestivalApplication\FestivalApplication\bin\Debug\net5.0\appsettings.Development.json
