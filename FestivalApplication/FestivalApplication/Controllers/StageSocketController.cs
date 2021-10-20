@@ -44,7 +44,7 @@ namespace FestivalApplication.Controllers
                 _logger.Log(LogLevel.Information, "WebSocket connection established");
 
                 //enter a loop for the socket
-                await Echo(webSocket,stageID);
+                await Echo(webSocket,stage);
             }
             else
             {
@@ -52,7 +52,7 @@ namespace FestivalApplication.Controllers
             }
         }
 
-        private async Task Echo(WebSocket webSocket,int stageID)
+        private async Task Echo(WebSocket webSocket,Stage stage)
         {
             //Create a buffer in which to store the incoming bytes
             var buffer = new byte[1024 * 4];
@@ -61,14 +61,13 @@ namespace FestivalApplication.Controllers
             MessageSocketStartDto startdto = JsonConvert.DeserializeObject<MessageSocketStartDto>(Encoding.UTF8.GetString(buffer));
             AuthenticateKey auth = new AuthenticateKey();
 
-                Stage stage = _context.Stage.Find(stageID);
+            
 
             if (auth.Authenticate(_context, startdto.AuthenticationKey)) //check if auth key exists in the database
             {
                 //find the user thats connected to the auth key and check in which stage said user is
                 User user = _context.Authentication.Find(auth).User;
                 
-
                 //Add a new socket to the instance
                 StageSocketManager.Instance.AddSocket(webSocket,stage);
 
