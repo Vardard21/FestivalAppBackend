@@ -9,14 +9,15 @@ namespace FestivalApplication.Model
 {
     public class AuthenticateKey
     {
-        private Boolean test = false;
+        private Boolean test = true;
 
         public Boolean Authenticate(DBContext context, string Key)
         {
             if (test)
             {
                 return true;
-            } else
+            }
+            else
             {
                 context.Authentication.RemoveRange(context.Authentication.Where(x => x.CurrentExpiryDate < DateTime.UtcNow));
                 context.SaveChanges();

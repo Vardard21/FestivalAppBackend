@@ -60,19 +60,16 @@ namespace FestivalApplication.Controllers
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             MessageSocketStartDto startdto = JsonConvert.DeserializeObject<MessageSocketStartDto>(Encoding.UTF8.GetString(buffer));
             AuthenticateKey auth = new AuthenticateKey();
-
+            var authentication = _context.Authentication.Where(x => x.AuthenticationKey == startdto.AuthenticationKey).Include(y=>y.User).FirstOrDefault();
             
 
-            if (auth.Authenticate(_context, startdto.AuthenticationKey)) //check if auth key exists in the database
+            if (authentication !=null) //check if auth key exists in the database
             {
                 //find the user thats connected to the auth key and check in which stage said user is
-                User user = _context.Authentication.Find(auth).User;
-                
-                //Add a new socket to the instance
-                StageSocketManager.Instance.AddSocket(webSocket,stage);
+                User user = authentication.User;
 
                 //validate if auth key is an artist
-                if (_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"])) 
+                if (_context.Authentication.Where(x => x.User.Role == "artist" && x.AuthenticationKey == authentication.AuthenticationKey).Any()) 
                 {
                     //create a list of tracks to be sent
                     StageSocketWriterDto<List<MusicListInfoDto>> adto = new StageSocketWriterDto<List<MusicListInfoDto>>();
@@ -84,6 +81,8 @@ namespace FestivalApplication.Controllers
                     //Enter a while loop for as long as the connection is not closed
                     while (!result.CloseStatus.HasValue)
                     {
+                        //empty buffer
+                        buffer = new byte[4 * 1024];
                         //Recieve the incoming TrackID and place the individual bytes into the buffer
                         result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                         string received = Encoding.UTF8.GetString(buffer);

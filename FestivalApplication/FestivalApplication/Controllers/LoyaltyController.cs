@@ -18,78 +18,38 @@ namespace FestivalApplication.Controllers
     public class LoyaltyController : ControllerBase
     {
         private readonly DBContext _context;
-
         public LoyaltyController(DBContext context)
         {
             _context = context;
         }
-        // GET: api/<LoyaltyController>
+
         [HttpGet]
-        //public Response<LoyaltyPointsDto> GetLoyaltyPointsList(int id)
-        //{
-        //    //creates a response variable to be sent
-        //    Response<LoyaltyPointsDto> response = new Response<LoyaltyPointsDto>();
-        //    try
-        //    {
-        //        AuthenticateKey auth = new AuthenticateKey();
-        //        if (auth.Authenticate(_context, Request.Headers["Authorization"]))
-        //        {
-        //            //Find user with id
-        //            User user = _context.User.Find(id);
-
-        //            //Create a new loyalty points DTO and fill the id, name and points
-        //            LoyaltyPointsDto dto = new LoyaltyPointsDto();
-        //            dto.UserID = user.UserID;
-        //            dto.UserName = user.UserName;
-        //            dto.Points = CalculatePoints(dto.UserID);
-
-
-        //            response.Success = true;
-        //            response.Data = dto;
-        //            return response;
-        //        }
-        //        else
-        //        {
-        //            response.AuthorizationError();
-        //            return response;
-        //        }
-        //    }
-        //    catch
-        //    {
-        //        response.ServerError();
-        //        return response;
-        //    }
-        //}
-
-        // PUT api/oyaltyController>/5
-        [HttpPut("{id}")]
-        public Response<LoyaltyPointsDto> GetLoyaltyPoints(int id)
+        public Response<List<LoyaltyPointsDto>> GetAllLoyaltyPoints()
         {
             //creates a response variable to be sent
-            Response<LoyaltyPointsDto> response = new Response<LoyaltyPointsDto>();
-            //try
-            //{
+            Response<List<LoyaltyPointsDto>> response = new Response<List<LoyaltyPointsDto>>();
+            try
+            {
                 AuthenticateKey auth = new AuthenticateKey();
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    //Find user with id
-                    User loyaltyUser = _context.User.Find(id);
+
 
                     //Find loyaltypoints row assigned to user
-                    LoyaltyPoints loyaltyPoints = _context.LoyaltyPoints.Find(loyaltyUser);
-                    DateTime lastupdated = default;
-                    
-                    //Create a new loyalty points DTO and fill the id, name and points
-                    LoyaltyPointsDto dto = new LoyaltyPointsDto();
-                    dto.UserID = loyaltyUser.UserID;
-                    dto.UserName = loyaltyUser.UserName;
-                    dto.Points = CalculatePoints(loyaltyUser, lastupdated);
+                    var loyaltyPoints = _context.LoyaltyPoints.Include(y => y.User).ToList();
 
-                    //loyaltyPoints.Points = dto.Points;
-                    //_context.Entry(loyaltyPoints).State = EntityState.Modified;
+                    //Create a new loyalty points DTO and fill the id, name and points
+                    List<LoyaltyPointsDto> allPoints = new List<LoyaltyPointsDto>();
+                    foreach (LoyaltyPoints entry in loyaltyPoints)
+                    {
+                        LoyaltyPointsDto dto = new LoyaltyPointsDto();
+                        dto.Points = entry.Points;
+                        allPoints.Add(dto);
+
+                    }
 
                     response.Success = true;
-                    response.Data = dto;
+                    response.Data = allPoints;
                     return response;
                 }
                 else
@@ -97,12 +57,70 @@ namespace FestivalApplication.Controllers
                     response.AuthorizationError();
                     return response;
                 }
-            //}
-            //catch
-            //{
-            //    response.ServerError();
-            //    return response;
-            //}
+            }
+            catch
+            {
+                response.ServerError();
+                return response;
+            }
+        }
+        // PUT api/oyaltyController>/5
+        [HttpPut("{id}")]
+        public Response<LoyaltyPointsDto> GetLoyaltyPoints(int id)
+        {
+            //creates a response variable to be sent
+            Response<LoyaltyPointsDto> response = new Response<LoyaltyPointsDto>();
+            try
+            {
+                AuthenticateKey auth = new AuthenticateKey();
+                if (auth.Authenticate(_context, Request.Headers["Authorization"]))
+                {
+                    //Find user with id
+                    User loyaltyUser = _context.User.Find(id);
+
+                    //Find loyaltypoints row assigned to user
+                    LoyaltyPoints loyaltyPoints = _context.LoyaltyPoints.Where(x => x.ID == id).FirstOrDefault();
+                    DateTime lastupdated = default;
+
+                    //Create a new loyalty points DTO and fill the id, name and points
+                    LoyaltyPointsDto dto = new LoyaltyPointsDto();
+                    dto.UserID = loyaltyUser.UserID;
+                    dto.UserName = loyaltyUser.UserName;
+                    
+                    dto.Points = CalculatePoints(loyaltyUser, lastupdated);
+
+                    loyaltyPoints.Points = dto.Points;
+                    loyaltyPoints.LastUpdated = DateTime.UtcNow;
+                    _context.Entry(loyaltyPoints).State = EntityState.Modified;
+
+
+                    //Save the changes
+                    if (_context.SaveChanges() > 0)
+                    {
+                        //Entry was updated succesfully
+                        response.Success = true;
+                        response.Data = dto;
+                        return response;
+                    }
+                    else
+                    {
+                        //Error in updating entry
+                        response.ServerError();
+                        response.Data.UserName = "State has not been updated";
+                        return response;
+                    }
+                }
+                else
+                {
+                    response.AuthorizationError();
+                    return response;
+                }
+            }
+            catch
+            {
+                response.ServerError();
+                return response;
+            }
         }
 
         private int CalculatePoints(User user, DateTime lastupdated)
