@@ -61,9 +61,9 @@ namespace FestivalApplication.Controllers
             MessageSocketStartDto startdto = JsonConvert.DeserializeObject<MessageSocketStartDto>(Encoding.UTF8.GetString(buffer));
             AuthenticateKey auth = new AuthenticateKey();
             var authentication = _context.Authentication.Where(x => x.AuthenticationKey == startdto.AuthenticationKey).Include(y=>y.User).FirstOrDefault();
-            
 
-            if (authentication !=null) //check if auth key exists in the database
+
+            if (authentication != null) //check if auth key exists in the database
             {
                 //Empty the buffer
                 buffer = new byte[1024 * 4];
@@ -76,13 +76,18 @@ namespace FestivalApplication.Controllers
                 User user = authentication.User;
 
                 //validate if auth key is an artist
-                if (_context.Authentication.Where(x => x.User.Role == "artist" && x.AuthenticationKey == authentication.AuthenticationKey).Any()) 
+                if (_context.Authentication.Where(x => x.User.Role == "artist" && x.AuthenticationKey == authentication.AuthenticationKey).Any())
                 {
+
+                    var ArtistDetected = Encoding.UTF8.GetBytes("Artist Detected, Sending Available Tracks Now ");
+                    //Send the message back to the Frontend through the webSocket
+                    await webSocket.SendAsync(new ArraySegment<byte>(ArtistDetected, 0, ArtistDetected.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+
                     //create a list of tracks to be sent
                     StageSocketWriterDto<List<MusicListInfoDto>> adto = new StageSocketWriterDto<List<MusicListInfoDto>>();
-                    adto.StageData=GetTracks();
+                    adto.StageData = GetTracks();
                     adto.StageCase = "ArtistGetList";
-                    var encodedmusiclists = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(adto)); 
+                    var encodedmusiclists = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(adto));
                     await webSocket.SendAsync(new ArraySegment<byte>(encodedmusiclists, 0, encodedmusiclists.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
 
                     //Enter a while loop for as long as the connection is not closed
@@ -94,62 +99,68 @@ namespace FestivalApplication.Controllers
                         result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                         string received = Encoding.UTF8.GetString(buffer);
 
+
+
                         //convert byte array to json
                         var incomingjson = JsonConvert.DeserializeObject<PlaylistReceiveDto>(received);
-                        var strInput = received.Trim();
-                        Console.WriteLine(incomingjson);
-                        //check if the object is a valid JSON
-                        if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object
-                            (strInput.StartsWith("[") && strInput.EndsWith("]")))    //For array
-                        {
-                            try
-                            {
-                                //create a new dto to send to frontend
-                                StageSocketWriterDto<PlaylistUpdateDto> dto = new StageSocketWriterDto<PlaylistUpdateDto>();
 
-                                //Select new tracks and add that to the dto
+
+                        try
+                        {
+                            //create a new dto to send to frontend
+                            StageSocketWriterDto<PlaylistUpdateDto> dto = new StageSocketWriterDto<PlaylistUpdateDto>();
+
+                            //Select new tracks and add that to the dto
+                            if (incomingjson != null)
+                            {
+                                var TrackSelected = Encoding.UTF8.GetBytes("Track Selected, Playing Now ");
+                                //Send the message back to the Frontend through the webSocket
+                                await webSocket.SendAsync(new ArraySegment<byte>(TrackSelected, 0, TrackSelected.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+
                                 dto.StageData = SelectNewTrack(incomingjson.TrackID, incomingjson.PlaylistID);
                                 dto.StageCase = "ArtistSelection";
-
-                                //Serialize the object and encode the object into an array of bytes
-                                var encodedResponseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dto));
-
-                                //Send the message back to the Frontend through the webSocket
-                                await webSocket.SendAsync(new ArraySegment<byte>(encodedResponseMsg, 0, encodedResponseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
-
-                                //Check if the message is not empty
-                                if (dto.StageData != null)
-                                {
-                                    //Send newly selected song to other clients
-                                    StageSocketManager.Instance.SendToTrackOtherClients(dto.StageData, webSocket,stage);
-                                }
                             }
-                            catch (Exception exp)
+                            else
                             {
-                                //Send back a response with the exception
-                                Response<System.Exception> response = new Response<System.Exception>();
-                                response.ServerError();
-                                response.Data = exp;
-                                //Serialize the object and encode the object into an array of bytes
-                                var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
-                                //Send the message back to the Frontend through the webSocket
-                                await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                                dto.StageData =null;
+                                dto.StageCase = "Failed";
+                            }
+
+                            //Serialize the object and encode the object into an array of bytes
+                            var encodedResponseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dto));
+
+                            //Send the message back to the Frontend through the webSocket
+                            await webSocket.SendAsync(new ArraySegment<byte>(encodedResponseMsg, 0, encodedResponseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+
+                            //Check if the message is not empty
+                            if (dto.StageData != null)
+                            {
+                                //Send newly selected song to other clients
+                                StageSocketManager.Instance.SendToTrackOtherClients(dto.StageData, webSocket, stage);
                             }
                         }
-                        else
+                        catch (Exception exp)
                         {
-                            continue;
+                            //Send back a response with the exception
+                            Response<System.Exception> response = new Response<System.Exception>();
+                            response.ServerError();
+                            response.Data = exp;
+                            //Serialize the object and encode the object into an array of bytes
+                            var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                            //Send the message back to the Frontend through the webSocket
+                            await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
                         }
 
                     }
                 }
-                else
-                {   //keep connection open but send nothing if not artist
-                    while (!result.CloseStatus.HasValue)
-                    {
-                        buffer = new byte[4 * 1024];
-                    }
+            
+            else
+            {   //keep connection open but send nothing if not artist
+                while (!result.CloseStatus.HasValue)
+                {
+                    buffer = new byte[4 * 1024];
                 }
+            }
 
             }
             //Close the connection when requested
