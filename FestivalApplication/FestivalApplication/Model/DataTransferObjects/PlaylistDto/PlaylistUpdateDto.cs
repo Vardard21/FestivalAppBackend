@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 
 namespace FestivalApplication.Model.DataTransferObjects
 {
-    public class StageCreateDto
+    public class PlaylistUpdateDto
     {
-        public int StageID { get; set; }
-        public string StageName { get; set; }
-        public bool StageActive { get; set; }
+        public string TrackName { get; set; }
+        public string TrackSource { get; set; }
+
+
+
     }
 }

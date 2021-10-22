@@ -69,7 +69,7 @@ namespace FestivalApplication.Controllers
             var StageActiveSockets = ActiveSockets.Where(x => x.stage.StageID == stage.StageID).ToList();
             StageSocketWriterDto<PlaylistUpdateDto> dto = new StageSocketWriterDto<PlaylistUpdateDto>();
             dto.StageData = track;
-            dto.StageCase = "IncomingTrack"+" This many sockets: "+StageActiveSockets.Count();
+            dto.StageCase = "IncomingTrack";
             var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dto));
 
 
