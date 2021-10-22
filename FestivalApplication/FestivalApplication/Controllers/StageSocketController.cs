@@ -65,6 +65,13 @@ namespace FestivalApplication.Controllers
 
             if (authentication !=null) //check if auth key exists in the database
             {
+                //Empty the buffer
+                buffer = new byte[1024 * 4];
+                //Confirm to the frontend that the connection is valid
+                var AuthConfirm = Encoding.UTF8.GetBytes("Authorization passed, connection now open");
+                //Send the message back to the Frontend through the webSocket
+                await webSocket.SendAsync(new ArraySegment<byte>(AuthConfirm, 0, AuthConfirm.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+
                 //find the user thats connected to the auth key and check in which stage said user is
                 User user = authentication.User;
 
@@ -90,7 +97,7 @@ namespace FestivalApplication.Controllers
                         //convert byte array to json
                         var incomingjson = JsonConvert.DeserializeObject<PlaylistReceiveDto>(received);
                         var strInput = received.Trim();
-
+                        Console.WriteLine(incomingjson);
                         //check if the object is a valid JSON
                         if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object
                             (strInput.StartsWith("[") && strInput.EndsWith("]")))    //For array
