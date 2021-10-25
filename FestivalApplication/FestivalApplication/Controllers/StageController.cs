@@ -46,27 +46,40 @@ namespace FestivalApplication.Controllers
                     List<StagesRequestDto> ActiveStages = new List<StagesRequestDto>();
 
 
-                        //create a for loop for each stage in stage status
-                        foreach (Stage stage in stagesstatus)
+                    //create a for loop for each stage in stage status
+                    foreach (Stage stage in stagesstatus)
+                    {
+                        //Create a new Stage Request DTO and fill the id and name
+                        StagesRequestDto dto = new StagesRequestDto();
+                        dto.StageID = stage.StageID;
+                        dto.StageName = stage.StageName;
+                        dto.StageGenre =stage.Genre;
+                        dto.StageRestriction = stage.Restriction;
+
+                        //Find the Current Song, temporarily only manually defined
+                        if (_context.MusicListActivity.Where(x=> x.StageID == stage.StageID).Any())
                         {
-                            //Create a new Stage Request DTO and fill the id and name
-                            StagesRequestDto dto = new StagesRequestDto();
-                            dto.StageID = stage.StageID;
-                            dto.StageName = stage.StageName;
-                            //Find the Current Song, temporarily only manually defined
-                            dto.CurrentSong = "Thunderstruck by AC/DC";
-                            ////Find the amount of active users in the stage
-                            dto.NumberOfUsers = _context.UserActivity
-                                .Where(x => x.Stage.StageID == stage.StageID)
-                                .Where(x => x.Exit == default)
-                                .Count();
-                            //Add the new object to the return list
-                            ActiveStages.Add(dto);
+                            int musiclistid = _context.MusicListActivity.Where(x=>x.StageID==stage.StageID).First().ListID;
+                            int trackid = _context.TrackActivity.Where(x => x.MusicListID ==musiclistid).First().TrackID;
+                            dto.CurrentSong = _context.Track.Find(trackid).TrackName;
+                        }
+                        else
+                        {
+                            dto.CurrentSong = "No Song Currently Playing";
                         }
 
-                        response.Success = true;
-                        response.Data = ActiveStages;
-                        return response;
+                        ////Find the amount of active users in the stage
+                        dto.NumberOfUsers = _context.UserActivity
+                            .Where(x => x.Stage.StageID == stage.StageID)
+                            .Where(x => x.Exit == default)
+                            .Count();
+                        //Add the new object to the return list
+                        ActiveStages.Add(dto);
+                    }
+
+                    response.Success = true;
+                    response.Data = ActiveStages;
+                    return response;
 
                 }
                 else

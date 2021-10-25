@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FestivalApplication.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20211020082637_LoyaltyPoints")]
-    partial class LoyaltyPoints
+    [Migration("20211025092706_musiclistsactivity")]
+    partial class musiclistsactivity
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -135,29 +135,14 @@ namespace FestivalApplication.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Finish")
-                        .HasColumnType("datetime");
-
                     b.Property<int>("ListID")
                         .HasColumnType("int");
 
                     b.Property<int?>("MusicListID")
                         .HasColumnType("int");
 
-                    b.Property<int>("NextNextSong")
-                        .HasColumnType("int");
-
-                    b.Property<int>("NextSong")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PreviousSong")
-                        .HasColumnType("int");
-
                     b.Property<int>("StageID")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("Start")
-                        .HasColumnType("datetime");
 
                     b.HasKey("ID");
 
@@ -174,6 +159,12 @@ namespace FestivalApplication.Migrations
 
                     b.Property<bool>("Archived")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Genre")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Restriction")
+                        .HasColumnType("text");
 
                     b.Property<bool>("StageActive")
                         .HasColumnType("tinyint(1)");

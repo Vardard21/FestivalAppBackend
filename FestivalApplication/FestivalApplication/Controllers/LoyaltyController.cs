@@ -79,7 +79,7 @@ namespace FestivalApplication.Controllers
                     User loyaltyUser = _context.User.Find(id);
 
                     //Find loyaltypoints row assigned to user
-                    LoyaltyPoints loyaltyPoints = _context.LoyaltyPoints.Where(x => x.ID == id).FirstOrDefault();
+
                     DateTime lastupdated = default;
 
                     //Create a new loyalty points DTO and fill the id, name and points
@@ -88,11 +88,22 @@ namespace FestivalApplication.Controllers
                     dto.UserName = loyaltyUser.UserName;
                     
                     dto.Points = CalculatePoints(loyaltyUser, lastupdated);
+                    if (_context.LoyaltyPoints.Where(x => x.ID == id).FirstOrDefault() == default)
+                    {
+                        LoyaltyPoints loyaltyPoints = new LoyaltyPoints();
+                        loyaltyPoints.Points = dto.Points;
+                        loyaltyPoints.User = loyaltyUser;
+                        loyaltyPoints.LastUpdated = DateTime.UtcNow;
+                        _context.LoyaltyPoints.Add(loyaltyPoints);
 
-                    loyaltyPoints.Points = dto.Points;
-                    loyaltyPoints.LastUpdated = DateTime.UtcNow;
-                    _context.Entry(loyaltyPoints).State = EntityState.Modified;
-
+                    }
+                    else
+                    {
+                        LoyaltyPoints loyaltyPoints = _context.LoyaltyPoints.Where(x => x.ID == id).First();
+                        loyaltyPoints.Points = dto.Points;
+                        loyaltyPoints.LastUpdated = DateTime.UtcNow;
+                        _context.Entry(loyaltyPoints).State = EntityState.Modified;
+                    }
 
                     //Save the changes
                     if (_context.SaveChanges() > 0)
@@ -129,6 +140,8 @@ namespace FestivalApplication.Controllers
             int likepoints = 0;
             int likedpoints = 0;
             int currentpoints = 0;
+            int timepoints = 0;
+            double timepointsdouble = 0;
             //Check Last Update
             if (lastupdated == default)
             {
@@ -136,6 +149,17 @@ namespace FestivalApplication.Controllers
                 messagepoints = _context.Message.Where(x=>x.UserActivity.User.UserID == user.UserID).Count();
                 likepoints = _context.Interaction.Where(x => x.UserActivity.User.UserID == user.UserID).Count();
                 likedpoints = _context.Interaction.Where(x => x.Message.UserActivity.User.UserID == user.UserID).Count();
+                var useractivities=_context.UserActivity.Where(x=>x.User.UserID==user.UserID&&x.Exit!=default).ToList() ;
+                foreach (UserActivity activity in useractivities)
+                {
+                    DateTime starttime =activity.Entry;
+                    DateTime endtime =activity.Exit??DateTime.Now;
+                    var timediff = (endtime - starttime).TotalSeconds;
+                    double calculatedtimepoints = timediff / 3600;
+ 
+                    timepointsdouble = timepointsdouble + calculatedtimepoints;
+                }
+                timepoints = Convert.ToInt32(timepointsdouble);
 
             }
             else
@@ -145,8 +169,20 @@ namespace FestivalApplication.Controllers
                 likepoints = _context.Interaction.Where(x => x.UserActivity.User.UserID == user.UserID && x.UserActivity.Exit > lastupdated).Count();
                 likedpoints = _context.Interaction.Where(x => x.Message.UserActivity.User.UserID == user.UserID && x.UserActivity.Exit > lastupdated).Count();
                 currentpoints = _context.LoyaltyPoints.Find(user).Points;
+                timepoints = 0;
+                var useractivities = _context.UserActivity.Where(x => x.User.UserID == user.UserID && x.Exit != default).ToList();
+                foreach (UserActivity activity in useractivities)
+                {
+                    DateTime starttime = activity.Entry;
+                    DateTime endtime = activity.Exit ?? DateTime.Now;
+                    var timediff = (endtime - starttime).TotalSeconds;
+                    double calculatedtimepoints = timediff / 3600;
+
+                    timepointsdouble = timepointsdouble + calculatedtimepoints;
+                }
+                timepoints = Convert.ToInt32(timepointsdouble);
             }           
-            int points = currentpoints + messagepoints + likepoints + likedpoints;
+            int points = currentpoints + messagepoints + likepoints + likedpoints+timepoints;
             return points;
 
         }

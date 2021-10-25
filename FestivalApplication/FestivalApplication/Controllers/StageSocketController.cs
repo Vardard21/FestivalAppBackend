@@ -40,11 +40,11 @@ namespace FestivalApplication.Controllers
                 //open a socket and add an instance to the list of sockets
                 Stage stage = _context.Stage.Find(stageID);
                 using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                StageSocketManager.Instance.AddSocket(webSocket,stage); //Might be able to delete, because line also exists below
+                StageSocketManager.Instance.AddSocket(webSocket, stage); //Might be able to delete, because line also exists below
                 _logger.Log(LogLevel.Information, "WebSocket connection established");
 
                 //enter a loop for the socket
-                await Echo(webSocket,stage);
+                await Echo(webSocket, stage);
             }
             else
             {
@@ -52,7 +52,7 @@ namespace FestivalApplication.Controllers
             }
         }
 
-        private async Task Echo(WebSocket webSocket,Stage stage)
+        private async Task Echo(WebSocket webSocket, Stage stage)
         {
             //Create a buffer in which to store the incoming bytes
             var buffer = new byte[1024 * 4];
@@ -60,7 +60,7 @@ namespace FestivalApplication.Controllers
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             MessageSocketStartDto startdto = JsonConvert.DeserializeObject<MessageSocketStartDto>(Encoding.UTF8.GetString(buffer));
             AuthenticateKey auth = new AuthenticateKey();
-            var authentication = _context.Authentication.Where(x => x.AuthenticationKey == startdto.AuthenticationKey).Include(y=>y.User).FirstOrDefault();
+            var authentication = _context.Authentication.Where(x => x.AuthenticationKey == startdto.AuthenticationKey).Include(y => y.User).FirstOrDefault();
 
 
             if (authentication != null) //check if auth key exists in the database
@@ -68,20 +68,16 @@ namespace FestivalApplication.Controllers
                 //Empty the buffer
                 buffer = new byte[1024 * 4];
                 //Confirm to the frontend that the connection is valid
-                var AuthConfirm = Encoding.UTF8.GetBytes("Authorization passed, connection now open");
+                var AuthConfirm = Encoding.UTF8.GetBytes("Stage Socket: Authorization passed, connection now open");
                 //Send the message back to the Frontend through the webSocket
                 await webSocket.SendAsync(new ArraySegment<byte>(AuthConfirm, 0, AuthConfirm.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
-
-                //find the user thats connected to the auth key and check in which stage said user is
-                User user = authentication.User;
-
                 //validate if auth key is an artist
                 if (_context.Authentication.Where(x => x.User.Role == "artist" && x.AuthenticationKey == authentication.AuthenticationKey).Any())
                 {
 
-                    var ArtistDetected = Encoding.UTF8.GetBytes("Artist Detected, Sending Available Tracks Now ");
-                    //Send the message back to the Frontend through the webSocket
-                    await webSocket.SendAsync(new ArraySegment<byte>(ArtistDetected, 0, ArtistDetected.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                    //var ArtistDetected = Encoding.UTF8.GetBytes("Artist Detected, Sending Available Tracks Now ");
+                    ////Send the message back to the Frontend through the webSocket
+                    //await webSocket.SendAsync(new ArraySegment<byte>(ArtistDetected, 0, ArtistDetected.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
 
                     //create a list of tracks to be sent
                     StageSocketWriterDto<List<MusicListInfoDto>> adto = new StageSocketWriterDto<List<MusicListInfoDto>>();
@@ -90,20 +86,20 @@ namespace FestivalApplication.Controllers
                     var encodedmusiclists = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(adto));
                     await webSocket.SendAsync(new ArraySegment<byte>(encodedmusiclists, 0, encodedmusiclists.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
 
+                    //find the user thats connected to the auth key and check in which stage said user is
+                    User user = authentication.User;
                     //Enter a while loop for as long as the connection is not closed
                     while (!result.CloseStatus.HasValue)
                     {
+
                         //empty buffer
                         buffer = new byte[4 * 1024];
                         //Recieve the incoming TrackID and place the individual bytes into the buffer
                         result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                         string received = Encoding.UTF8.GetString(buffer);
 
-
-
                         //convert byte array to json
                         var incomingjson = JsonConvert.DeserializeObject<PlaylistReceiveDto>(received);
-
 
                         try
                         {
@@ -113,16 +109,16 @@ namespace FestivalApplication.Controllers
                             //Select new tracks and add that to the dto
                             if (incomingjson != null)
                             {
-                                var TrackSelected = Encoding.UTF8.GetBytes("Track Selected, Playing Now ");
-                                //Send the message back to the Frontend through the webSocket
-                                await webSocket.SendAsync(new ArraySegment<byte>(TrackSelected, 0, TrackSelected.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                                //var TrackSelected = Encoding.UTF8.GetBytes("Track Selected, Playing Now ");
+                                ////Send the message back to the Frontend through the webSocket
+                                //await webSocket.SendAsync(new ArraySegment<byte>(TrackSelected, 0, TrackSelected.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
 
-                                dto.StageData = SelectNewTrack(incomingjson.TrackID, incomingjson.PlaylistID);
+                                dto.StageData = SelectNewTrack(incomingjson.TrackID, incomingjson.PlaylistID, authentication,stage.StageID);
                                 dto.StageCase = "ArtistSelection";
                             }
                             else
                             {
-                                dto.StageData =null;
+                                dto.StageData = null;
                                 dto.StageCase = "Failed";
                             }
 
@@ -153,20 +149,36 @@ namespace FestivalApplication.Controllers
 
                     }
                 }
-            
-            else
-            {   //keep connection open but send nothing if not artist
-                while (!result.CloseStatus.HasValue)
+                else
                 {
-                    buffer = new byte[4 * 1024];
+                    StageSocketWriterDto<PlaylistUpdateDto> dto = new StageSocketWriterDto<PlaylistUpdateDto>();
+                    int trackid = _context.TrackActivity.Where(x => x.Playing == true).FirstOrDefault().TrackID;
+                    Track track = _context.Track.Find(trackid);
+                    Response<PlaylistUpdateDto> response = new Response<PlaylistUpdateDto>();
+
+                    PlaylistUpdateDto trackdto = new PlaylistUpdateDto();
+                    trackdto.TrackName = track.TrackName;
+                    trackdto.TrackSource = track.TrackSource;
+                    response.Success = true;
+                    response.Data = trackdto;
+                    dto.StageData = response;
+                    dto.StageCase = "OnLoadTrack";
+                    var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dto));
+                    await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                    {   //keep connection open but send nothing if not artist
+                        while (!result.CloseStatus.HasValue)
+                        {
+                            buffer = new byte[4 * 1024];
+                        }
+                    }
+
                 }
             }
-
-            }
             //Close the connection when requested
-            StageSocketManager.Instance.RemoveSocket(webSocket,stage);
+            StageSocketManager.Instance.RemoveSocket(webSocket, stage);
+
         }
-        private Response<PlaylistUpdateDto> SelectNewTrack(int id, int musicid)
+        private Response<PlaylistUpdateDto> SelectNewTrack(int id, int musicid, Authentication authentication,int StageID)
         {
             //create a response to send back
             Response<PlaylistUpdateDto> response = new Response<PlaylistUpdateDto>();
@@ -174,11 +186,10 @@ namespace FestivalApplication.Controllers
             {
 
                 //check if user is actually an artist 
-                if (_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                if (!_context.Authentication.Where(x => x.User.Role == "artist" && x.AuthenticationKey == authentication.AuthenticationKey).Any())
                 {
                     //User is not an artist
                     response.InvalidOperation();
-                    Console.WriteLine("User is not an artist");
                     return response;
                 }
 
@@ -187,7 +198,6 @@ namespace FestivalApplication.Controllers
                 {
                     //Playlist does not exist
                     response.InvalidData();
-                    Console.WriteLine("Playlist doesnt exist");
                     return response;
                 }
 
@@ -197,7 +207,7 @@ namespace FestivalApplication.Controllers
                 //turn all playing to false
                 foreach (TrackActivity trackactivity in playlist)
                 {
-                    {  
+                    {
                         trackactivity.Playing = false;
                         _context.Entry(trackactivity).State = EntityState.Modified;
                     }
@@ -218,8 +228,9 @@ namespace FestivalApplication.Controllers
                             PlaylistUpdateDto dto = new PlaylistUpdateDto();
                             dto.TrackName = track.TrackName;
                             dto.TrackSource = track.TrackSource;
+                            UpdateMusiclistActivity(StageID, musicid);
 
-
+                            //save trackactivity
                             _context.Entry(trackactivity).State = EntityState.Modified;
                             if (_context.SaveChanges() > 0)
                             {
@@ -234,13 +245,15 @@ namespace FestivalApplication.Controllers
                                 response.ServerError();
                                 return response;
                             }
+                            
+
                         }
                     }
                 }
                 else
-                {                    
+                {
                     response.InvalidData();
-                    response.Data.TrackName="Multiple Playlists found";
+                    response.Data.TrackName = "Multiple Playlists found";
                     return response;
                 }
 
@@ -252,7 +265,6 @@ namespace FestivalApplication.Controllers
             catch
             {
                 response.ServerError();
-                response.Data.TrackName = "Server Error";
                 return response;
             }
         }
@@ -310,9 +322,90 @@ namespace FestivalApplication.Controllers
             }
         }
 
+
+        private Response<int> UpdateMusiclistActivity(int StageID, int MusiclistID)
+        {   
+            //Create the response to be send out
+            Response<int> response = new Response<int>();
+            try {
+
+                //If the stageID is not 0, validate that the StageID exists and the stage is active
+                if (StageID != 0)
+                {
+                    if (_context.Stage.Find(StageID).StageActive != true)
+                    {
+                        response.InvalidOperation();
+                        return response;
+                    }
+
+                    if (_context.MusicListActivity.Any(x => x.StageID == StageID && x.ListID == MusiclistID))
+                    {
+                        //check if list exists for stage already
+                        if (_context.MusicListActivity.Where(x => x.StageID == StageID&& x.StageID!=MusiclistID).Any())
+                        {
+                            var ExistingActivities = _context.MusicListActivity.Where(x => x.StageID == StageID && x.StageID != MusiclistID).ToList();
+                            foreach (MusicListActivity musicListactivity in ExistingActivities)
+                            {
+                                //delete existing activities for stage
+                                _context.MusicListActivity.Remove(musicListactivity);
+                            }
+                        }
+                        var activelist = _context.MusicListActivity.Where(x => x.StageID == StageID && x.ListID == MusiclistID).First();
+                        activelist.ListID = MusiclistID;
+                        activelist.StageID = StageID;
+                        _context.Entry(activelist).State = EntityState.Modified;
+                    }
+                    else
+                    {
+                        //check if list exists for stage already
+                        if (_context.MusicListActivity.Where(x => x.StageID == StageID).Any())
+                        {
+                            var ExistingActivities = _context.MusicListActivity.Where(x => x.StageID == StageID).ToList();
+                            foreach (MusicListActivity musicListactivity in ExistingActivities)
+                            {
+                                //delete existing activities for stage
+                                _context.MusicListActivity.Remove(musicListactivity);
+                            }
+                        }
+                        //Create a new UserActivity for this UserID and StageID
+                        MusicListActivity activity = new MusicListActivity();
+                        activity.ListID = MusiclistID;
+                        activity.StageID = StageID;
+
+                        _context.MusicListActivity.Add(activity);
+                    }
+                    //Save the changes
+                    if (_context.SaveChanges() > 0)
+                    {
+                        //Message was saved correctly
+                        response.Success = true;
+                        return response;
+                    }
+                    else
+                    {
+                        //Message was not saved correctly
+                        response.ServerError();
+                        return response;
+                    }
+
+
+                }
+                else
+                {
+                    response.InvalidOperation();
+                    return response;
+                }
+            }
+            catch
+            {
+                response.InvalidOperation();
+                Console.WriteLine("catcherror");
+                return response;
+            }
+        }
     }
 
-}
+} 
 
 
 
