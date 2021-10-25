@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace FestivalApplication.Model.DataTransferObjects
 {
-    public class TrackRequestDto
+    public class TrackItemDto
     {
         public int TrackID { get; set; }
         public string TrackName { get; set; }
