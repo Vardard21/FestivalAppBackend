@@ -40,7 +40,6 @@ namespace FestivalApplication.Controllers
                     List<Stage> stagesstatus = new List<Stage>();
                     if (user.Role == "admin")
                     {
-
                         //create a stages variable to be checked
                         stagesstatus = _context.Stage
                         .Where(x => x.StageActive == true)
