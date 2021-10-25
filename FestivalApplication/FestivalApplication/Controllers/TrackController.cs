@@ -13,7 +13,7 @@ using FestivalApplication.Model.DataTransferObjects;
 
 namespace FestivalApplication.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Track")]
     [ApiController]
     public class TrackController : ControllerBase
     {
@@ -165,14 +165,14 @@ namespace FestivalApplication.Controllers
                     Track newTrack = new Track();
 
                     //check if the new track has name of an existing track
-                    var trackfound = _context.Track.Where(x => x.TrackName == tracknewdto.TrackName).ToList();
+                    var trackfound = _context.Track.Where(x => x.TrackSource == tracknewdto.TrackSource).ToList();
 
 
                     if (trackfound.Count() == 1)
                     {
 
                         response.InvalidOperation();
-                        response.Data = "Track with the same name already exists";
+                        response.Data = "Track with the same source already exists";
                         return response;
 
                     }
