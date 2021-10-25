@@ -167,6 +167,8 @@ namespace FestivalApplication.Controllers
                     //check if the new track has name of an existing track
                     var trackfound = _context.Track.Where(x => x.TrackSource == tracknewdto.TrackSource).ToList();
 
+                    
+
 
                     if (trackfound.Count() == 1)
                     {
@@ -175,6 +177,17 @@ namespace FestivalApplication.Controllers
                         response.Data = "Track with the same source already exists";
                         return response;
 
+                    }
+                    else if(tracknewdto.TrackSource == "" ){
+                        response.InvalidOperation();
+                        response.Data = "Track has no source";
+                        return response;
+                    }
+                    else if (tracknewdto.TrackName == "" )
+                    {
+                        response.InvalidOperation();
+                        response.Data = "Track has no name";
+                        return response;
                     }
                     else
                     {
