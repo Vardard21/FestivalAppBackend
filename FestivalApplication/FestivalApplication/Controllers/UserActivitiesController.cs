@@ -43,10 +43,28 @@ namespace FestivalApplication.Controllers
                             return response;
                         }
                     }
+                    User user = _context.User.Where(x => x.UserID == userActivity.UserID).First();
                     //Validate that the UserID exists
-                    if (_context.User.Where(x => x.UserID == userActivity.UserID).ToList().Count() != 1)
+                    bool allowed;
+                    if (user==default)
                     {
                         response.InvalidData();
+                        return response;
+                    }
+                    if (userActivity.StageID==0)
+                    {
+                        allowed = true;
+                    }
+                    else
+                    {
+                        Stage stage = _context.Stage.Where(x => x.StageID == userActivity.StageID).First();
+                        allowed = CheckIfAllowed(user, stage);
+                    }
+
+                    //check if use is allowed to enter stage
+                    if (!allowed)
+                    {
+                        response.InvalidOperation();
                         return response;
                     }
 
@@ -103,5 +121,33 @@ namespace FestivalApplication.Controllers
                 return response;
             }
         }
+        private bool CheckIfAllowed(User user, Stage stage)
+        {
+            if (stage.Archived == true)
+            {
+                return false;
+            }
+            else if (stage.StageActive == false)
+            {
+                return false;
+            }
+            else if (stage.Restriction == "admin" && user.Role == "admin")
+            {
+                return true;
+            }
+            else if (stage.Restriction == "artist" && user.Role == "artist" || user.Role == "admin")
+            {
+                return true;
+            }
+            else if (stage.Restriction == "none")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
+  
 }

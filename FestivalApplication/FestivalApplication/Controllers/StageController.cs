@@ -43,13 +43,13 @@ namespace FestivalApplication.Controllers
 
                         //create a stages variable to be checked
                         stagesstatus = _context.Stage
-                            .Where(x => x.StageActive == true)
-                            .ToList();
+                        .Where(x => x.StageActive == true)
+                        .ToList();
                     }
                     else if(user.Role=="artist")
                     {
                         stagesstatus = _context.Stage
-                        .Where(x => x.StageActive == true && x.Restriction == "artist" || x.Restriction == "none")
+                        .Where(x => x.StageActive == true && (x.Restriction == "artist" || x.Restriction == "none"))
                         .ToList();
                     }
                     else
@@ -183,7 +183,6 @@ namespace FestivalApplication.Controllers
         }
 
         // POST: api/Stage
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public Response<string> PostStage(StageCreateDto stagecreatedto)
         {
@@ -259,7 +258,6 @@ namespace FestivalApplication.Controllers
         }
 
         // PUT: api/StagesController/
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
         public Response<string> PutUser(StageUpdateDto changestage)
         {
@@ -461,9 +459,7 @@ namespace FestivalApplication.Controllers
                     }
                     else
                     {
-                        response.Success = false;
-                        response.Data = ActiveStages;
-                        response.ErrorMessage.Add(1);
+                        response.ServerError();
                         return response;
                     }
                 }
