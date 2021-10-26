@@ -228,7 +228,7 @@ namespace FestivalApplication.Controllers
             Response<int> response = new Response<int>();
             try {
                 //Validate that the fields exist
-                if (user.PassWord != null && user.UserName != null)
+                if (!string.IsNullOrEmpty(user.PassWord) && !string.IsNullOrEmpty(user.UserName))
                 {
                     //Validate that the username does not exist
                     if (_context.User.Any(x => x.UserName == user.UserName))

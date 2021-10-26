@@ -8,11 +8,13 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using FestivalApplication.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FestivalApplication.Controllers
 {
-    public class StageSocketManager
+    public class StageSocketManager: ControllerBase
     {
         private static StageSocketManager instance = null;
         private static readonly object padlock = new object();
@@ -37,7 +39,7 @@ namespace FestivalApplication.Controllers
             }
         }
 
-        public void AddSocket(WebSocket webSocket, Stage stage)
+        public void AddSocket(WebSocket webSocket, Stage stage, Response<List<StageUsersDto>> response)
         {
             StageWebSocket stageWebSocket = new StageWebSocket();
             stageWebSocket.webSocket = webSocket;
@@ -45,14 +47,14 @@ namespace FestivalApplication.Controllers
             ActiveSockets.Add(stageWebSocket);
         }
 
-        public async void RemoveSocket(WebSocket webSocket, Stage stage)
+        public async void RemoveSocket(WebSocket webSocket, Stage stage, Response<List<StageUsersDto>> response)
         {
             try
             {
                 StageWebSocket stageWebSocket = new StageWebSocket();
                 stageWebSocket.webSocket = webSocket;
                 stageWebSocket.stage = stage;
-                await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing the connection", CancellationToken.None);
+                await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing the connection", CancellationToken.None);               
                 ActiveSockets.Remove(stageWebSocket);
             }
             catch
@@ -63,8 +65,33 @@ namespace FestivalApplication.Controllers
                 ActiveSockets.Remove(stageWebSocket);
             }
         }
+        public async void UpdateUserList(Stage stage, Response<List<StageUsersDto>> response)
+        {
+            var StageActiveSockets = ActiveSockets.Where(x => x.stage.StageID == stage.StageID).ToList();
+            StageSocketWriterDto<List<StageUsersDto>> udto = new StageSocketWriterDto<List<StageUsersDto>>();
+            udto.StageData = response;
+            udto.StageCase = "UpdatedUserList";
+            var userResponseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(udto));
 
-        public async void SendToTrackOtherClients(Response<PlaylistUpdateDto> track, WebSocket ParentSocket, Stage stage)
+            foreach (StageWebSocket socket in StageActiveSockets)
+            {
+                if (socket.webSocket.State != WebSocketState.Open & socket.webSocket.State != WebSocketState.Connecting)
+                {
+                    RemoveSocket(socket.webSocket, socket.stage, response);
+                }
+                try
+                {
+                    await socket.webSocket.SendAsync(new ArraySegment<byte>(userResponseMsg, 0, userResponseMsg.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                }
+                catch
+                {
+                    RemoveSocket(socket.webSocket, socket.stage, response);
+                }
+            }
+
+        }
+ 
+        public async void SendToTrackOtherClients(Response<PlaylistUpdateDto> track, WebSocket ParentSocket, Stage stage, Response<List<StageUsersDto>> response)
         {
             var StageActiveSockets = ActiveSockets.Where(x => x.stage.StageID == stage.StageID).ToList();
             StageSocketWriterDto<PlaylistUpdateDto> dto = new StageSocketWriterDto<PlaylistUpdateDto>();
@@ -77,7 +104,7 @@ namespace FestivalApplication.Controllers
             {
                 if (socket.webSocket.State != WebSocketState.Open & socket.webSocket.State != WebSocketState.Connecting)
                 {
-                    RemoveSocket(socket.webSocket, socket.stage);
+                    RemoveSocket(socket.webSocket, socket.stage, response);
                 }
                 if (socket.webSocket != ParentSocket && track.Success == true)
                 {
@@ -87,10 +114,12 @@ namespace FestivalApplication.Controllers
                     }
                     catch
                     {
-                        RemoveSocket(socket.webSocket, socket.stage);
+                        RemoveSocket(socket.webSocket, socket.stage, response);
                     }
                 }
             }
+            
         }
+        
     }
 }

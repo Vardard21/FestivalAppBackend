@@ -36,39 +36,70 @@ namespace FestivalApplication.Controllers
                 AuthenticateKey auth = new AuthenticateKey();
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    //create a stages variable to be checked
-                    var stagesstatus = _context.Stage
+                    User user = _context.Authentication.Where(x => x.AuthenticationKey == Request.Headers["Authorization"]).Include(y => y.User).First().User;
+                    List<Stage> stagesstatus = new List<Stage>();
+                    if (user.Role == "admin")
+                    {
+                        //create a stages variable to be checked
+                        stagesstatus = _context.Stage
                         .Where(x => x.StageActive == true)
                         .ToList();
+                    }
+                    else if(user.Role=="artist")
+                    {
+                        stagesstatus = _context.Stage
+                        .Where(x => x.StageActive == true && (x.Restriction == "artist" || x.Restriction == "none"))
+                        .ToList();
+                    }
+                    else
+                    {
+                        stagesstatus = _context.Stage
+                        .Where(x => x.StageActive == true && x.Restriction == "none")
+                        .ToList();
+                    }
+
 
 
                     //create a list of active stages
                     List<StagesRequestDto> ActiveStages = new List<StagesRequestDto>();
 
 
-                        //create a for loop for each stage in stage status
-                        foreach (Stage stage in stagesstatus)
+                    //create a for loop for each stage in stage status
+                    foreach (Stage stage in stagesstatus)
+                    {
+                        //Create a new Stage Request DTO and fill the id and name
+                        StagesRequestDto dto = new StagesRequestDto();
+                        dto.StageID = stage.StageID;
+                        dto.StageName = stage.StageName;
+                        dto.StageGenre = stage.Genre;
+                        dto.StageRestriction = stage.Restriction;
+
+                        //Find the Current Song, temporarily only manually defined
+                        if (_context.MusicListActivity.Where(x => x.StageID == stage.StageID).Any())
                         {
-                            //Create a new Stage Request DTO and fill the id and name
-                            StagesRequestDto dto = new StagesRequestDto();
-                            dto.StageID = stage.StageID;
-                            dto.StageName = stage.StageName;
-                            //Find the Current Song, temporarily only manually defined
-                            dto.CurrentSong = "Thunderstruck by AC/DC";
-                            ////Find the amount of active users in the stage
-                            dto.NumberOfUsers = _context.UserActivity
-                                .Where(x => x.Stage.StageID == stage.StageID)
-                                .Where(x => x.Exit == default)
-                                .Count();
-                            //Add the new object to the return list
-                            ActiveStages.Add(dto);
+                            int musiclistid = _context.MusicListActivity.Where(x => x.StageID == stage.StageID).First().ListID;
+                            int trackid = _context.TrackActivity.Where(x => x.MusicListID == musiclistid).First().TrackID;
+                            dto.CurrentSong = _context.Track.Find(trackid).TrackName;
+                        }
+                        else
+                        {
+                            dto.CurrentSong = "No Song Currently Playing";
                         }
 
-                        response.Success = true;
-                        response.Data = ActiveStages;
-                        return response;
+                        ////Find the amount of active users in the stage
+                        dto.NumberOfUsers = _context.UserActivity
+                            .Where(x => x.Stage.StageID == stage.StageID)
+                            .Where(x => x.Exit == default)
+                            .Count();
+                        //Add the new object to the return list
+                        ActiveStages.Add(dto);
+                    }
 
+                    response.Success = true;
+                    response.Data = ActiveStages;
+                    return response;
                 }
+                
                 else
                 {
                     response.AuthorizationError();
@@ -104,6 +135,7 @@ namespace FestivalApplication.Controllers
                     //create a stages variable to be checked
                     var stageusers = _context.UserActivity
                         .Where(x => x.Stage.StageID == id && x.Exit == default)
+                        .Include(y=>y.User)
                         .ToList();
 
 
@@ -151,7 +183,6 @@ namespace FestivalApplication.Controllers
         }
 
         // POST: api/Stage
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public Response<string> PostStage(StageCreateDto stagecreatedto)
         {
@@ -227,7 +258,6 @@ namespace FestivalApplication.Controllers
         }
 
         // PUT: api/StagesController/
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
         public Response<string> PutUser(StageUpdateDto changestage)
         {
@@ -399,8 +429,21 @@ namespace FestivalApplication.Controllers
                             dto.StageID = stage.StageID;
                             dto.StageName = stage.StageName;
                             dto.StageActive = stage.StageActive;
+                            dto.StageGenre = stage.Genre;
+                            dto.StageRestriction = stage.Restriction;
+
                             //Find the Current Song, temporarily only manually defined
-                            dto.CurrentSong = "Thunderstruck by AC/DC";
+                            if (_context.MusicListActivity.Where(x => x.StageID == stage.StageID).Any())
+                            {
+                                int musiclistid = _context.MusicListActivity.Where(x => x.StageID == stage.StageID).First().ListID;
+                                int trackid = _context.TrackActivity.Where(x => x.MusicListID == musiclistid).First().TrackID;
+                                dto.CurrentSong = _context.Track.Find(trackid).TrackName;
+                            }
+                            else
+                            {
+                                dto.CurrentSong = "No Song Currently Playing";
+                            }
+
                             ////Find the amount of active users in the stage
                             dto.NumberOfUsers = _context.UserActivity
                                 .Where(x => x.Stage.StageID == stage.StageID)
@@ -416,9 +459,7 @@ namespace FestivalApplication.Controllers
                     }
                     else
                     {
-                        response.Success = false;
-                        response.Data = ActiveStages;
-                        response.ErrorMessage.Add(1);
+                        response.ServerError();
                         return response;
                     }
                 }

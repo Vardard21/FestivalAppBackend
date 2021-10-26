@@ -4,7 +4,7 @@ using MySql.EntityFrameworkCore.Metadata;
 
 namespace FestivalApplication.Migrations
 {
-    public partial class LoyaltyPoints : Migration
+    public partial class musiclistsactivity : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -29,7 +29,9 @@ namespace FestivalApplication.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     StageName = table.Column<string>(type: "text", nullable: true),
                     StageActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Archived = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    Archived = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Genre = table.Column<string>(type: "text", nullable: true),
+                    Restriction = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -74,11 +76,6 @@ namespace FestivalApplication.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     ListID = table.Column<int>(type: "int", nullable: false),
                     StageID = table.Column<int>(type: "int", nullable: false),
-                    PreviousSong = table.Column<int>(type: "int", nullable: false),
-                    NextSong = table.Column<int>(type: "int", nullable: false),
-                    NextNextSong = table.Column<int>(type: "int", nullable: false),
-                    Start = table.Column<DateTime>(type: "datetime", nullable: false),
-                    Finish = table.Column<DateTime>(type: "datetime", nullable: false),
                     MusicListID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
