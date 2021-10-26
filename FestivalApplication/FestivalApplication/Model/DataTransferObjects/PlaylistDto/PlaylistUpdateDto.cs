@@ -9,6 +9,8 @@ namespace FestivalApplication.Model.DataTransferObjects
     {
         public string TrackName { get; set; }
         public string TrackSource { get; set; }
+        public double SongTime { get; set; }
+        public bool Playing { get; set; }
 
 
 

@@ -93,7 +93,6 @@ namespace FestivalApplication.Controllers
                     //Enter a while loop for as long as the connection is not closed
                     while (!result.CloseStatus.HasValue)
                     {
-
                         //empty buffer
                         buffer = new byte[4 * 1024];
                         //Recieve the incoming TrackID and place the individual bytes into the buffer
@@ -102,51 +101,111 @@ namespace FestivalApplication.Controllers
 
                         //convert byte array to json
                         var incomingjson = JsonConvert.DeserializeObject<PlaylistReceiveDto>(received);
-
-                        try
+                        StageSocketWriterDto<PlaylistUpdateDto> dto = new StageSocketWriterDto<PlaylistUpdateDto>();
+                        if (incomingjson != null)
                         {
-                            //create a new dto to send to frontend
-                            StageSocketWriterDto<PlaylistUpdateDto> dto = new StageSocketWriterDto<PlaylistUpdateDto>();
-
-                            //Select new tracks and add that to the dto
-                            if (incomingjson != null)
+                            try
                             {
-                                //var TrackSelected = Encoding.UTF8.GetBytes("Track Selected, Playing Now ");
-                                ////Send the message back to the Frontend through the webSocket
-                                //await webSocket.SendAsync(new ArraySegment<byte>(TrackSelected, 0, TrackSelected.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                                if (incomingjson.ReceivedCase == "SongSelection")
+                                {
+                                    //create a new dto to send to frontend
+                                   
 
-                                dto.StageData = SelectNewTrack(incomingjson.TrackID, incomingjson.PlaylistID, authentication,stage.StageID);
-                                dto.StageCase = "ArtistSelection";
+                                    //Select new tracks and add that to the dto
+
+                                    //var TrackSelected = Encoding.UTF8.GetBytes("Track Selected, Playing Now ");
+                                    ////Send the message back to the Frontend through the webSocket
+                                    //await webSocket.SendAsync(new ArraySegment<byte>(TrackSelected, 0, TrackSelected.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+
+                                    dto.StageData = SelectNewTrack(incomingjson.TrackID, incomingjson.PlaylistID, authentication, stage.StageID);
+                                    dto.StageCase = "ArtistSelection";
+
+
+                                    //Serialize the object and encode the object into an array of bytes
+                                    var encodedResponseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dto));
+
+                                    //Send the message back to the Frontend through the webSocket
+                                    await webSocket.SendAsync(new ArraySegment<byte>(encodedResponseMsg, 0, encodedResponseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+
+                                    //Check if the message is not empty
+                                    if (dto.StageData != null)
+                                    {
+                                        //Send newly selected song to other clients
+                                        StageSocketManager.Instance.SendToTrackOtherClients(dto, webSocket, stage, GetStageUsers(stage));
+                                    }
+                                }
+                                else if (incomingjson.ReceivedCase == "SongPause")
+                                {
+
+                                        dto.StageData.Success = true;
+                                        var track = _context.Track.Where(x => x.TrackID == incomingjson.TrackID).First();
+                                        dto.StageData.Data.TrackName = track.TrackName;
+                                        dto.StageData.Data.TrackSource = track.TrackSource;
+                                        dto.StageCase = incomingjson.ReceivedCase;
+
+                                    //Serialize the object and encode the object into an array of bytes
+                                    var encodedResponseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dto));
+
+                                    //Send the message back to the Frontend through the webSocket
+                                    await webSocket.SendAsync(new ArraySegment<byte>(encodedResponseMsg, 0, encodedResponseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+
+                                    //Check if the message is not empty
+                                    if (dto.StageData != null)
+                                    {
+                                        //Send newly selected song to other clients
+                                        StageSocketManager.Instance.SendToTrackOtherClients(dto, webSocket, stage, GetStageUsers(stage));
+                                    }
+                                }
+                                else if (incomingjson.ReceivedCase == "SongPause")
+                                {
+                                    double pausedtime = incomingjson.SongTime;
+                                    dto.StageData.Data.SongTime = pausedtime;
+                                    dto.StageData.Success = true;
+                                    var track = _context.Track.Where(x => x.TrackID == incomingjson.TrackID).First();
+                                    dto.StageData.Data.TrackName = track.TrackName;
+                                    dto.StageData.Data.TrackSource = track.TrackSource;
+                                    dto.StageCase = incomingjson.ReceivedCase;
+
+                                    //Serialize the object and encode the object into an array of bytes
+                                    var encodedResponseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dto));
+
+                                    //Send the message back to the Frontend through the webSocket
+                                    await webSocket.SendAsync(new ArraySegment<byte>(encodedResponseMsg, 0, encodedResponseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+
+                                    //Check if the message is not empty
+                                    if (dto.StageData != null)
+                                    {
+                                        //Send newly selected song to other clients
+                                        StageSocketManager.Instance.SendToTrackOtherClients(dto, webSocket, stage, GetStageUsers(stage));
+                                    }
+                                }
+
+
+
                             }
-                            else
+                            catch (Exception exp)
                             {
-                                dto.StageData = null;
-                                dto.StageCase = "Failed";
+                                //Send back a response with the exception
+                                Response<System.Exception> response = new Response<System.Exception>();
+                                response.ServerError();
+                                response.Data = exp;
+                                //Serialize the object and encode the object into an array of bytes
+                                var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                                //Send the message back to the Frontend through the webSocket
+                                await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
                             }
 
+
+                        }
+                        else
+                        {
+                            dto.StageData = null;
+                            dto.StageCase = "Failed";
                             //Serialize the object and encode the object into an array of bytes
                             var encodedResponseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dto));
 
                             //Send the message back to the Frontend through the webSocket
                             await webSocket.SendAsync(new ArraySegment<byte>(encodedResponseMsg, 0, encodedResponseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
-
-                            //Check if the message is not empty
-                            if (dto.StageData != null)
-                            {
-                                //Send newly selected song to other clients
-                                StageSocketManager.Instance.SendToTrackOtherClients(dto.StageData, webSocket, stage,GetStageUsers(stage));
-                            }
-                        }
-                        catch (Exception exp)
-                        {
-                            //Send back a response with the exception
-                            Response<System.Exception> response = new Response<System.Exception>();
-                            response.ServerError();
-                            response.Data = exp;
-                            //Serialize the object and encode the object into an array of bytes
-                            var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
-                            //Send the message back to the Frontend through the webSocket
-                            await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
                         }
 
                     }
@@ -232,6 +291,7 @@ namespace FestivalApplication.Controllers
                             PlaylistUpdateDto dto = new PlaylistUpdateDto();
                             dto.TrackName = track.TrackName;
                             dto.TrackSource = track.TrackSource;
+                            dto.SongTime = 0;
                             UpdateMusiclistActivity(StageID, musicid);
 
                             //save trackactivity
@@ -249,8 +309,6 @@ namespace FestivalApplication.Controllers
                                 response.ServerError();
                                 return response;
                             }
-                            
-
                         }
                     }
                 }
@@ -260,11 +318,7 @@ namespace FestivalApplication.Controllers
                     response.Data.TrackName = "Multiple Playlists found";
                     return response;
                 }
-
                 return response;
-
-
-
             }
             catch
             {
@@ -301,7 +355,7 @@ namespace FestivalApplication.Controllers
                     foreach (TrackActivity trackactivity in playlist)
                     {
                         //add the track to the playlist
-                        Track track = _context.Track.Find(trackactivity.TrackID);
+                        Track track = _context.Track.Where(x=>x.TrackID==trackactivity.TrackID).First();
                         PlaylistRequestDto dto = new PlaylistRequestDto();
                         dto.Id = trackactivity.TrackID;
                         dto.TrackName = track.TrackName;

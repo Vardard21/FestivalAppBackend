@@ -91,11 +91,28 @@ namespace FestivalApplication.Controllers
 
         }
  
-        public async void SendToTrackOtherClients(Response<PlaylistUpdateDto> track, WebSocket ParentSocket, Stage stage, Response<List<StageUsersDto>> response)
+        public async void SendToTrackOtherClients(StageSocketWriterDto<PlaylistUpdateDto> track, WebSocket ParentSocket, Stage stage, Response<List<StageUsersDto>> response)
         {
             var StageActiveSockets = ActiveSockets.Where(x => x.stage.StageID == stage.StageID).ToList();
             StageSocketWriterDto<PlaylistUpdateDto> dto = new StageSocketWriterDto<PlaylistUpdateDto>();
-            dto.StageData = track;
+            Response<PlaylistUpdateDto> OutgoingSignal = new Response<PlaylistUpdateDto>();
+            if (track.StageCase == "SongSelection")
+            {
+                track.StageData.Data.SongTime = 0;
+                track.StageData.Data.Playing = true;
+            }
+            else if (track.StageCase == "SongPause")
+            {
+                track.StageData.Data.SongTime = track.StageData.Data.SongTime;
+                track.StageData.Data.Playing = false;
+            }
+            else if (track.StageCase == "SongResume")
+            {
+                track.StageData.Data.SongTime = track.StageData.Data.SongTime;
+                track.StageData.Data.Playing = true;
+            }
+            OutgoingSignal = track.StageData;
+            dto.StageData = OutgoingSignal;
             dto.StageCase = "IncomingTrack";
             var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dto));
 
@@ -106,7 +123,7 @@ namespace FestivalApplication.Controllers
                 {
                     RemoveSocket(socket.webSocket, socket.stage, response);
                 }
-                if (socket.webSocket != ParentSocket && track.Success == true)
+                if (socket.webSocket != ParentSocket && OutgoingSignal.Success == true)
                 {
                     try
                     {

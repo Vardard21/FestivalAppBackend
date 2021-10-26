@@ -78,8 +78,16 @@ namespace FestivalApplication.Controllers
                         if (_context.MusicListActivity.Where(x => x.StageID == stage.StageID).Any())
                         {
                             int musiclistid = _context.MusicListActivity.Where(x => x.StageID == stage.StageID).First().ListID;
-                            int trackid = _context.TrackActivity.Where(x => x.MusicListID == musiclistid).First().TrackID;
-                            dto.CurrentSong = _context.Track.Find(trackid).TrackName;
+                            var TestActivities = _context.TrackActivity.Where(x => x.MusicListID == musiclistid && x.Playing == true).ToList();
+                            if (TestActivities.Count()>=1)
+                            {
+                                int trackid = _context.TrackActivity.Where(x => x.MusicListID == musiclistid&&x.Playing==true).First().TrackID;
+                                dto.CurrentSong = _context.Track.Find(trackid).TrackName;
+                            }
+                            else
+                            {
+                                dto.CurrentSong = "No Song Currently Playing";
+                            }    
                         }
                         else
                         {
