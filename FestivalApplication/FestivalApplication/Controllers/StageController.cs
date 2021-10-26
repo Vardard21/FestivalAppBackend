@@ -135,6 +135,7 @@ namespace FestivalApplication.Controllers
                     //create a stages variable to be checked
                     var stageusers = _context.UserActivity
                         .Where(x => x.Stage.StageID == id && x.Exit == default)
+                        .Include(y=>y.User)
                         .ToList();
 
 

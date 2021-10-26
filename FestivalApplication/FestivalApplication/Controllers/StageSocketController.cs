@@ -40,7 +40,7 @@ namespace FestivalApplication.Controllers
                 //open a socket and add an instance to the list of sockets
                 Stage stage = _context.Stage.Find(stageID);
                 using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                StageSocketManager.Instance.AddSocket(webSocket, stage); //Might be able to delete, because line also exists below
+                StageSocketManager.Instance.AddSocket(webSocket, stage, GetStageUsers(stage)); //Might be able to delete, because line also exists below
                 _logger.Log(LogLevel.Information, "WebSocket connection established");
 
                 //enter a loop for the socket
@@ -65,12 +65,14 @@ namespace FestivalApplication.Controllers
 
             if (authentication != null) //check if auth key exists in the database
             {
+
                 //Empty the buffer
                 buffer = new byte[1024 * 4];
                 //Confirm to the frontend that the connection is valid
                 var AuthConfirm = Encoding.UTF8.GetBytes("Stage Socket: Authorization passed, connection now open");
                 //Send the message back to the Frontend through the webSocket
                 await webSocket.SendAsync(new ArraySegment<byte>(AuthConfirm, 0, AuthConfirm.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                StageSocketManager.Instance.UpdateUserList(stage, GetStageUsers(stage));
                 //validate if auth key is an artist
                 if (_context.Authentication.Where(x => x.User.Role == "artist" && x.AuthenticationKey == authentication.AuthenticationKey).Any())
                 {
@@ -132,7 +134,7 @@ namespace FestivalApplication.Controllers
                             if (dto.StageData != null)
                             {
                                 //Send newly selected song to other clients
-                                StageSocketManager.Instance.SendToTrackOtherClients(dto.StageData, webSocket, stage);
+                                StageSocketManager.Instance.SendToTrackOtherClients(dto.StageData, webSocket, stage,GetStageUsers(stage));
                             }
                         }
                         catch (Exception exp)
@@ -169,13 +171,15 @@ namespace FestivalApplication.Controllers
                         while (!result.CloseStatus.HasValue)
                         {
                             buffer = new byte[4 * 1024];
+
                         }
                     }
 
                 }
             }
             //Close the connection when requested
-            StageSocketManager.Instance.RemoveSocket(webSocket, stage);
+            StageSocketManager.Instance.UpdateUserList(stage, GetStageUsers(stage));
+            StageSocketManager.Instance.RemoveSocket(webSocket, stage,GetStageUsers(stage));
 
         }
         private Response<PlaylistUpdateDto> SelectNewTrack(int id, int musicid, Authentication authentication,int StageID)
@@ -400,6 +404,65 @@ namespace FestivalApplication.Controllers
             {
                 response.InvalidOperation();
                 Console.WriteLine("catcherror");
+                return response;
+            }
+        }
+
+        private Response<List<StageUsersDto>> GetStageUsers(Stage stage)
+        {
+
+            //creates a response variable to be sent
+            Response<List<StageUsersDto>> response = new Response<List<StageUsersDto>>();
+            try
+            {
+                //checks if stage exists
+                if (!_context.Stage.Any(x => x.StageID == stage.StageID))
+                {
+                    //Stage does not exist
+                    response.InvalidData();
+                    return response;
+                }
+
+                //create a stages variable to be checked
+                var stageusers = _context.UserActivity
+                    .Where(x => x.Stage.StageID == stage.StageID && x.Exit == default)
+                    .Include(y => y.User)
+                    .ToList();
+
+                List<StageUsersDto> ActiveUsers = new List<StageUsersDto>();
+
+                if (!ActiveUsers.Any())
+                {
+
+                    //create a for loop for each stage in stage status
+                    foreach (UserActivity useractivity in stageusers)
+                    {
+                        //Create a new Stage Request DTO and fill the id and name
+                        StageUsersDto dto = new StageUsersDto();
+                        User user = _context.User.Find(useractivity.User.UserID);
+                        dto.UserID = user.UserID;
+                        dto.UserName = user.UserName;
+                        dto.UserRole = user.Role;
+
+
+                        //Add the new object to the return list
+                        ActiveUsers.Add(dto);
+                    }
+
+                    response.Success = true;
+                    response.Data = ActiveUsers;
+                    return response;
+                }
+                else
+                {
+                    response.ServerError();
+                    return response;
+                }
+
+            }
+            catch
+            {
+                response.ServerError();
                 return response;
             }
         }
