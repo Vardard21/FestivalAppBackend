@@ -110,7 +110,6 @@ namespace FestivalApplication.Controllers
                     List<TrackItemDto> trackdetails = new List<TrackItemDto>();
 
 
-                    //create a for loop for each stage in stage status
                     foreach (Track track in trackitem)
                     {
 
@@ -302,9 +301,9 @@ namespace FestivalApplication.Controllers
         }
 
         // DELETE api/<TrackController>/5
-        // Is not working at the moment due to no interaction with stagesocket
-        [HttpDelete("{TrackID}")]
-        public Response<string> Delete(int TrackID)
+    
+        [HttpDelete("{id}")]
+        public Response<string> Delete(int id)
         {
             Response<string> response = new Response<string>();
             try
@@ -319,8 +318,11 @@ namespace FestivalApplication.Controllers
                         //response.InvalidOperation();
                         //return response;
                     //}
-                    //Validate that the track exists
-                    Track track = _context.Track.Find(TrackID);
+                    //Validate that the track exist
+                    Track track = _context.Track.Find(id);
+                
+
+                
                     if (track == null)
                     {
                         response.InvalidData();
@@ -333,9 +335,16 @@ namespace FestivalApplication.Controllers
                     //  response.InvalidOperation();
                     //return response;
                     //}
-
+                    var activityList = _context.TrackActivity.Where(x => x.TrackID == id).ToList();
                     //Remove any interactions
-                    _context.Track.RemoveRange(_context.Track.Where(x => x == track));
+                    foreach (TrackActivity activity in activityList)
+                    {
+                        _context.TrackActivity.Remove(activity);
+
+                    }
+                    _context.Track.RemoveRange(_context.Track.Where(x => x.TrackID == track.TrackID));
+                
+
 
 
                     //Delete the track

@@ -301,7 +301,7 @@ namespace FestivalApplication.Controllers
                     foreach (TrackActivity trackactivity in playlist)
                     {
                         //add the track to the playlist
-                        Track track = _context.Track.Find(trackactivity.TrackID);
+                        Track track = _context.Track.Where(x=>x.TrackID==trackactivity.TrackID).First();
                         PlaylistRequestDto dto = new PlaylistRequestDto();
                         dto.Id = trackactivity.TrackID;
                         dto.TrackName = track.TrackName;
