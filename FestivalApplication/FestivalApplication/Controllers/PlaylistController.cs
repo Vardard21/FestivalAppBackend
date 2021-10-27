@@ -69,7 +69,6 @@ namespace FestivalApplication.Controllers
                         dto.Id = track.TrackID;
                         dto.TrackName = track.TrackName;
                         dto.TrackSource = track.TrackSource;
-                        dto.Length = track.Length;
                         PlaylistTracks.Add(dto);
                     }
                     //add the playlist to the list of playlists
@@ -153,7 +152,6 @@ namespace FestivalApplication.Controllers
                             dto.Id = trackactivity.TrackID;
                             dto.TrackName = track.TrackName;
                             dto.TrackSource = track.TrackSource;
-                            dto.Length = track.Length;
                             PlaylistTracks.Add(dto);
                         }
                         //add the playlist to the list of playlists
