@@ -109,14 +109,13 @@ namespace FestivalApplication.Controllers
                                 if (incomingjson.ReceivedCase == "SongSelection")
                                 {
                                     //create a new dto to send to frontend
-                                   
+
 
                                     //Select new tracks and add that to the dto
 
                                     //var TrackSelected = Encoding.UTF8.GetBytes("Track Selected, Playing Now ");
                                     ////Send the message back to the Frontend through the webSocket
                                     //await webSocket.SendAsync(new ArraySegment<byte>(TrackSelected, 0, TrackSelected.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
-
                                     dto.StageData = SelectNewTrack(incomingjson.TrackID, incomingjson.PlaylistID, authentication, stage.StageID);
                                     dto.StageCase = "ArtistSelection";
 
@@ -137,12 +136,10 @@ namespace FestivalApplication.Controllers
                                 else if (incomingjson.ReceivedCase == "SongPause")
                                 {
 
-                                        dto.StageData.Success = true;
-                                        var track = _context.Track.Where(x => x.TrackID == incomingjson.TrackID).First();
-                                        dto.StageData.Data.TrackName = track.TrackName;
-                                        dto.StageData.Data.TrackSource = track.TrackSource;
-                                        dto.StageCase = incomingjson.ReceivedCase;
-
+                                    var currentList =_context.MusicListActivity.Where(x=>x.StageID==stage.StageID).First();
+                                    var trackActivity = _context.TrackActivity.Where(x => x.MusicListID == currentList.ListID).First();
+                                    dto.StageData = SelectNewTrack(trackActivity.TrackID, currentList.ListID, authentication, stage.StageID);
+                                    dto.StageCase = incomingjson.ReceivedCase;
                                     //Serialize the object and encode the object into an array of bytes
                                     var encodedResponseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dto));
 
@@ -156,15 +153,14 @@ namespace FestivalApplication.Controllers
                                         StageSocketManager.Instance.SendToTrackOtherClients(dto, webSocket, stage, GetStageUsers(stage));
                                     }
                                 }
-                                else if (incomingjson.ReceivedCase == "SongPause")
+                                else if (incomingjson.ReceivedCase == "SongResume")
                                 {
-                                    double pausedtime = incomingjson.SongTime;
-                                    dto.StageData.Data.SongTime = pausedtime;
-                                    dto.StageData.Success = true;
-                                    var track = _context.Track.Where(x => x.TrackID == incomingjson.TrackID).First();
-                                    dto.StageData.Data.TrackName = track.TrackName;
-                                    dto.StageData.Data.TrackSource = track.TrackSource;
+                                    var currentList = _context.MusicListActivity.Where(x => x.StageID == stage.StageID).First().ListID;
+                                    var trackActivity = _context.TrackActivity.Where(x => x.MusicListID == currentList).First().TrackID;
+                                    dto.StageData = SelectNewTrack(trackActivity, currentList, authentication, stage.StageID, incomingjson.SongTime);
                                     dto.StageCase = incomingjson.ReceivedCase;
+
+
 
                                     //Serialize the object and encode the object into an array of bytes
                                     var encodedResponseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dto));
@@ -293,6 +289,93 @@ namespace FestivalApplication.Controllers
                             dto.TrackSource = track.TrackSource;
                             dto.SongTime = 0;
                             UpdateMusiclistActivity(StageID, musicid);
+
+                            //save trackactivity
+                            _context.Entry(trackactivity).State = EntityState.Modified;
+                            if (_context.SaveChanges() > 0)
+                            {
+                                //Track has been set to playing
+                                response.Success = true;
+                                response.Data = dto;
+                                return response;
+                            }
+                            else
+                            {
+                                //Error in saving track
+                                response.ServerError();
+                                return response;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    response.InvalidData();
+                    response.Data.TrackName = "Multiple Playlists found";
+                    return response;
+                }
+                return response;
+            }
+            catch
+            {
+                response.ServerError();
+                return response;
+            }
+        }
+        private Response<PlaylistUpdateDto> SelectNewTrack(int id, int musicid, Authentication authentication, int StageID,double SongTime)
+        {
+            //create a response to send back
+            Response<PlaylistUpdateDto> response = new Response<PlaylistUpdateDto>();
+            try
+            {
+
+                //check if user is actually an artist 
+                if (!_context.Authentication.Where(x => x.User.Role == "artist" && x.AuthenticationKey == authentication.AuthenticationKey).Any())
+                {
+                    //User is not an artist
+                    response.InvalidOperation();
+                    return response;
+                }
+
+                // check if the playlist exists
+                if (!(_context.MusicList.Where(x => x.ID == musicid).Count() == 1))
+                {
+                    //Playlist does not exist
+                    response.InvalidData();
+                    return response;
+                }
+
+                //checks which tracks are in the musiclist
+                var playlist = _context.TrackActivity.Where(x => x.MusicListID == musicid).ToList();
+
+                //turn all playing to false
+                foreach (TrackActivity trackactivity in playlist)
+                {
+                    {
+                        trackactivity.Playing = false;
+                        _context.Entry(trackactivity).State = EntityState.Modified;
+                    }
+                }
+
+                //find selected track
+                var selectedtrack = _context.TrackActivity.Where(x => x.TrackID == id && x.MusicListID == musicid).ToList();
+
+                //check if selected track only has 1 entry
+                if (selectedtrack.Count() == 1)
+                {
+                    foreach (TrackActivity trackactivity in selectedtrack)
+                    {
+                        {
+                            //update the required track in the playlist
+                            trackactivity.Playing = true;
+                            Track track = _context.Track.Where(x=>x.TrackID==trackactivity.TrackID).First();
+                            PlaylistUpdateDto dto = new PlaylistUpdateDto();
+                            dto.TrackName = track.TrackName;
+                            dto.TrackID = track.TrackID;
+                            dto.TrackSource = track.TrackSource;
+                            dto.SongTime = SongTime;
+                            dto.PlayListID =musicid;
+                            dto.Playing = true;
 
                             //save trackactivity
                             _context.Entry(trackactivity).State = EntityState.Modified;

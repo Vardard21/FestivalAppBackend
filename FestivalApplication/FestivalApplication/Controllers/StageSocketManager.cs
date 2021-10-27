@@ -96,24 +96,26 @@ namespace FestivalApplication.Controllers
             var StageActiveSockets = ActiveSockets.Where(x => x.stage.StageID == stage.StageID).ToList();
             StageSocketWriterDto<PlaylistUpdateDto> dto = new StageSocketWriterDto<PlaylistUpdateDto>();
             Response<PlaylistUpdateDto> OutgoingSignal = new Response<PlaylistUpdateDto>();
-            if (track.StageCase == "SongSelection")
+            dto.StageCase="Test";
+            if (track.StageCase == "ArtistSelection")
             {
                 track.StageData.Data.SongTime = 0;
                 track.StageData.Data.Playing = true;
+                dto.StageCase = "IncomingTrack";
             }
             else if (track.StageCase == "SongPause")
             {
-                track.StageData.Data.SongTime = track.StageData.Data.SongTime;
                 track.StageData.Data.Playing = false;
+                dto.StageCase = "SongPause";
             }
             else if (track.StageCase == "SongResume")
             {
                 track.StageData.Data.SongTime = track.StageData.Data.SongTime;
                 track.StageData.Data.Playing = true;
+                dto.StageCase = "SongResume";
             }
             OutgoingSignal = track.StageData;
             dto.StageData = OutgoingSignal;
-            dto.StageCase = "IncomingTrack";
             var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dto));
 
 
