@@ -227,6 +227,25 @@ namespace FestivalApplication.Controllers
                     else
                     {
                         newStage.StageName = stagecreatedto.StageName;
+
+                        if (stagecreatedto.StageGenre.Any())
+                        {
+                            newStage.Genre = stagecreatedto.StageGenre;
+                        }
+                        else
+                        {
+                            newStage.Genre = null;
+                        }
+
+                        if (stagecreatedto.StageRestriction.Any())
+                        {
+                            newStage.Restriction = stagecreatedto.StageRestriction;
+                        }
+                        else
+                        {
+                            newStage.Restriction ="none";
+                        }
+
                         if (stagecreatedto.StageName.Any())
                         {
                             newStage.StageActive = stagecreatedto.StageActive;
@@ -299,6 +318,22 @@ namespace FestivalApplication.Controllers
                         //Change the state
                         Stage stage = _context.Stage.Find(changestage.StageID);
                         stage.StageActive = changestage.StageActive;
+                        if (changestage.StageGenre.Any())
+                        {
+                            stage.Genre = changestage.StageGenre;
+                        }
+                        else
+                        {
+                            stage.Genre = null;
+                        }
+                        if (changestage.StageRestriction.Any())
+                        {
+                            stage.Restriction = changestage.StageRestriction;
+                        }
+                        else
+                        {
+                            stage.Restriction = "none";
+                        }
                         _context.Entry(stage).State = EntityState.Modified;
 
                         //Save the changes

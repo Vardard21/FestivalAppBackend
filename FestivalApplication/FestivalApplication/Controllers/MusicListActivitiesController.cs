@@ -60,7 +60,6 @@ namespace FestivalApplication.Controllers
                     dto.Id = trackactivity.TrackID;
                     dto.TrackName = track.TrackName;
                     dto.TrackSource = track.TrackSource;
-                    dto.Length = track.Length;
                     RequestedTracks.Add(dto);
                 }
                 response.Success = true;
