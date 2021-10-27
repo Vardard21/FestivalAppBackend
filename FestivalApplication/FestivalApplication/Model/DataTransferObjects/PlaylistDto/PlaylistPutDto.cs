@@ -8,7 +8,7 @@ namespace FestivalApplication.Model.DataTransferObjects
     public class PlaylistPutDto
     {
         public int PlayListId { get; set; }
-        public List<TrackPositionDto> TrackPosition { get; set; }
+        public List<TrackPositionDto> TrackPositionArray { get; set; }
 
 
 

@@ -40,12 +40,12 @@ namespace FestivalApplication.Controllers
                     //create a list of tracks to add to each musiclist
                     var MusicLists = _context.MusicList.Include(y=>y.MusicTracks).ToList();
 
-                    //if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
-                    //{
-                    //    //User changing the role is not an artist
-                    //    response.InvalidOperation();
-                    //    return response;
-                    //}
+                   if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    {
+                        //User changing the role is not an artist
+                        response.InvalidOperation();
+                        return response;
+                    }
 
                     foreach (MusicList musiclist in MusicLists)
                 {
@@ -113,12 +113,12 @@ namespace FestivalApplication.Controllers
                         response.InvalidData();
                         return response;
                     }
-                    //if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
-                    //{
-                    //    //User changing the role is not an artist
-                    //    response.InvalidOperation();
-                    //    return response;
-                    //}
+                    if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    {
+                        //User changing the role is not an artist
+                        response.InvalidOperation();
+                        return response;
+                    }
 
                     //create a playlist variable to be checked
                     var playlist = _context.MusicList
@@ -188,12 +188,12 @@ namespace FestivalApplication.Controllers
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Validate that the requestor is an artist
-                    //if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
-                    //{
+                    if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    {
                     //User changing the role is not an artist
-                    // response.InvalidOperation();
-                    //return response;
-                    //}
+                     response.InvalidOperation();
+                    return response;
+                    }
 
                     //create a new track to be inserted in DB
                     MusicList newMusicList = new MusicList();
@@ -269,12 +269,12 @@ namespace FestivalApplication.Controllers
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Validate that the requestor is an admin
-                    //if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
-                    //{
+                    if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                   {
                     //User changing the role is not an admin
-                    //response.InvalidOperation();
-                    //return response;
-                    //}
+                    response.InvalidOperation();
+                    return response;
+                    }
 
                     //Check if the musicList exists
                     if ((_context.MusicList.Any(x => x.ID == addtrack.PlayListId)))
@@ -282,7 +282,7 @@ namespace FestivalApplication.Controllers
                     {
                         List<TrackActivity> listoftracks = _context.TrackActivity.Where(x=> x.MusicListID == addtrack.PlayListId).ToList();
 
-                        foreach(TrackPositionDto positiondto in addtrack.TrackPosition)
+                        foreach(TrackPositionDto positiondto in addtrack.TrackPositionArray)
                         {
                             //check it the track exists and that the track is not already in the list
                             if(_context.Track.Where(x=> x.TrackID == positiondto.TrackID).Any() &&
@@ -331,9 +331,6 @@ namespace FestivalApplication.Controllers
                         //add a track
                         //MusicList musiclist = _context.MusicList.Where(x => x.ID == addtrack.PlayListId).First();
 
-
-
-
                     }
                     else
                     {
@@ -369,11 +366,11 @@ namespace FestivalApplication.Controllers
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Validate that the user deleting the track is an artist
-                    //if (!_context.Authentication.Any(x => x.AuthenticationKey == Request.Headers["Authorization"] && x.User.Role == "artist"))
-                    //{
-                    //response.InvalidOperation();
-                    //return response;
-                    //}
+                    if (!_context.Authentication.Any(x => x.AuthenticationKey == Request.Headers["Authorization"] && x.User.Role == "artist"))
+                    {
+                    response.InvalidOperation();
+                    return response;
+                    }
                     //Validate that the track exists
                     MusicList musiclist = _context.MusicList.Find(id);
                     if (musiclist == null)

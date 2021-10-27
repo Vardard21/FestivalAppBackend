@@ -34,12 +34,12 @@ namespace FestivalApplication.Controllers
                 AuthenticateKey auth = new AuthenticateKey();
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    //if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
-                    //{
+                    if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    {
                         //User changing the role is not an artist
-                        //response.InvalidOperation();
-                       // return response;
-                    //}
+                        response.InvalidOperation();
+                        return response;
+                    }
 
 
                     //Get a list of all music list
@@ -94,12 +94,12 @@ namespace FestivalApplication.Controllers
                         response.InvalidData();
                         return response;
                     }
-                    //if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
-                    //{
-                    //    //User changing the role is not an artist
-                    //    response.InvalidOperation();
-                    //    return response;
-                    //}
+                    if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    {
+                        //User changing the role is not an artist
+                       response.InvalidOperation();
+                        return response;
+                    }
 
                     //create a track variable to be checked
                     var trackitem = _context.Track
@@ -153,12 +153,12 @@ namespace FestivalApplication.Controllers
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Validate that the requestor is an artist
-                    //if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
-                    //{
+                    if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    {
                         //User changing the role is not an artist
-                       // response.InvalidOperation();
-                        //return response;
-                    //}
+                        response.InvalidOperation();
+                        return response;
+                    }
 
                     //create a new track to be inserted in DB
                     Track newTrack = new Track();
@@ -239,12 +239,12 @@ namespace FestivalApplication.Controllers
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Validate that the requestor is an admin
-                    //if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
-                    //{
+                    if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                    {
                         //User changing the role is not an admin
-                        //response.InvalidOperation();
-                        //return response;
-                    //}
+                        response.InvalidOperation();
+                       return response;
+                   }
 
                     //Check if the stageID exists
                     if ((_context.Track.Any(x => x.TrackID == changetrack.TrackID)))
@@ -313,11 +313,11 @@ namespace FestivalApplication.Controllers
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
                     //Validate that the user deleting the track is an artist
-                    //if (!_context.Authentication.Any(x => x.AuthenticationKey == Request.Headers["Authorization"] && x.User.Role == "artist"))
-                    //{
-                        //response.InvalidOperation();
-                        //return response;
-                    //}
+                    if (!_context.Authentication.Any(x => x.AuthenticationKey == Request.Headers["Authorization"] && x.User.Role == "artist"))
+                    {
+                        response.InvalidOperation();
+                        return response;
+                    }
                     //Validate that the track exist
                     Track track = _context.Track.Find(id);
                 
