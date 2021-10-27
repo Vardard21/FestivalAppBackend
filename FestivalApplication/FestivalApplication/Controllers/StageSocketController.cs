@@ -288,6 +288,9 @@ namespace FestivalApplication.Controllers
                             dto.TrackName = track.TrackName;
                             dto.TrackSource = track.TrackSource;
                             dto.SongTime = 0;
+                            dto.Playing = true;
+                            dto.PlayListID = musicid;
+                            dto.TrackID = track.TrackID;
                             UpdateMusiclistActivity(StageID, musicid);
 
                             //save trackactivity

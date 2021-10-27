@@ -228,7 +228,7 @@ namespace FestivalApplication.Controllers
                     {
                         newStage.StageName = stagecreatedto.StageName;
 
-                        if (stagecreatedto.StageGenre.Any())
+                        if (stagecreatedto.StageGenre !=null)
                         {
                             newStage.Genre = stagecreatedto.StageGenre;
                         }
@@ -237,7 +237,7 @@ namespace FestivalApplication.Controllers
                             newStage.Genre = null;
                         }
 
-                        if (stagecreatedto.StageRestriction.Any())
+                        if (stagecreatedto.StageRestriction != null)
                         {
                             newStage.Restriction = stagecreatedto.StageRestriction;
                         }
@@ -318,7 +318,7 @@ namespace FestivalApplication.Controllers
                         //Change the state
                         Stage stage = _context.Stage.Find(changestage.StageID);
                         stage.StageActive = changestage.StageActive;
-                        if (changestage.StageGenre.Any())
+                        if (changestage.StageGenre != null)
                         {
                             stage.Genre = changestage.StageGenre;
                         }
@@ -326,7 +326,7 @@ namespace FestivalApplication.Controllers
                         {
                             stage.Genre = null;
                         }
-                        if (changestage.StageRestriction.Any())
+                        if (changestage.StageRestriction != null)
                         {
                             stage.Restriction = changestage.StageRestriction;
                         }
@@ -403,6 +403,7 @@ namespace FestivalApplication.Controllers
                     if (stage.StageActive)
                     {
                         response.InvalidOperation();
+                        response.Data = "Stage is still Active";
                         return response;
                     }
 
