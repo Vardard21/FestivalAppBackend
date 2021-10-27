@@ -78,8 +78,16 @@ namespace FestivalApplication.Controllers
                         if (_context.MusicListActivity.Where(x => x.StageID == stage.StageID).Any())
                         {
                             int musiclistid = _context.MusicListActivity.Where(x => x.StageID == stage.StageID).First().ListID;
-                            int trackid = _context.TrackActivity.Where(x => x.MusicListID == musiclistid).First().TrackID;
-                            dto.CurrentSong = _context.Track.Find(trackid).TrackName;
+                            var TestActivities = _context.TrackActivity.Where(x => x.MusicListID == musiclistid && x.Playing == true).ToList();
+                            if (TestActivities.Count()>=1)
+                            {
+                                int trackid = _context.TrackActivity.Where(x => x.MusicListID == musiclistid&&x.Playing==true).First().TrackID;
+                                dto.CurrentSong = _context.Track.Find(trackid).TrackName;
+                            }
+                            else
+                            {
+                                dto.CurrentSong = "No Song Currently Playing";
+                            }    
                         }
                         else
                         {
@@ -219,6 +227,25 @@ namespace FestivalApplication.Controllers
                     else
                     {
                         newStage.StageName = stagecreatedto.StageName;
+
+                        if (stagecreatedto.StageGenre !=null)
+                        {
+                            newStage.Genre = stagecreatedto.StageGenre;
+                        }
+                        else
+                        {
+                            newStage.Genre = null;
+                        }
+
+                        if (stagecreatedto.StageRestriction != null)
+                        {
+                            newStage.Restriction = stagecreatedto.StageRestriction;
+                        }
+                        else
+                        {
+                            newStage.Restriction ="none";
+                        }
+
                         if (stagecreatedto.StageName.Any())
                         {
                             newStage.StageActive = stagecreatedto.StageActive;
@@ -291,6 +318,22 @@ namespace FestivalApplication.Controllers
                         //Change the state
                         Stage stage = _context.Stage.Find(changestage.StageID);
                         stage.StageActive = changestage.StageActive;
+                        if (changestage.StageGenre != null)
+                        {
+                            stage.Genre = changestage.StageGenre;
+                        }
+                        else
+                        {
+                            stage.Genre = null;
+                        }
+                        if (changestage.StageRestriction != null)
+                        {
+                            stage.Restriction = changestage.StageRestriction;
+                        }
+                        else
+                        {
+                            stage.Restriction = "none";
+                        }
                         _context.Entry(stage).State = EntityState.Modified;
 
                         //Save the changes
@@ -360,6 +403,7 @@ namespace FestivalApplication.Controllers
                     if (stage.StageActive)
                     {
                         response.InvalidOperation();
+                        response.Data = "Stage is still Active";
                         return response;
                     }
 

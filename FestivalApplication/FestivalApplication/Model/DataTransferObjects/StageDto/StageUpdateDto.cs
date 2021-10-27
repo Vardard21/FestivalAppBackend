@@ -9,5 +9,7 @@ namespace FestivalApplication.Model.DataTransferObjects
     {
         public int StageID { get; set; }
         public bool StageActive { get; set; }
+        public string StageGenre { get; set; }
+        public string StageRestriction { get; set; }
     }
 }
