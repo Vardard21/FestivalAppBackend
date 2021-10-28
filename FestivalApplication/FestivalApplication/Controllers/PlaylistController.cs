@@ -40,12 +40,12 @@ namespace FestivalApplication.Controllers
                     //create a list of tracks to add to each musiclist
                     var MusicLists = _context.MusicList.Include(y=>y.MusicTracks).ToList();
 
-                   if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
+                  if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
                     {
                         //User changing the role is not an artist
-                        response.InvalidOperation();
-                        return response;
-                    }
+                       response.InvalidOperation();
+                      return response;
+                   }
 
                     foreach (MusicList musiclist in MusicLists)
                 {
@@ -268,9 +268,9 @@ namespace FestivalApplication.Controllers
                 AuthenticateKey auth = new AuthenticateKey();
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    //Validate that the requestor is an admin
+                    //Validate that the requestor is an artist
                     if (!_context.Authentication.Any(x => x.User.Role == "artist" && x.AuthenticationKey == Request.Headers["Authorization"]))
-                   {
+                    {
                     //User changing the role is not an admin
                     response.InvalidOperation();
                     return response;
@@ -285,8 +285,9 @@ namespace FestivalApplication.Controllers
                         foreach(TrackPositionDto positiondto in addtrack.TrackPositionArray)
                         {
                             //check it the track exists and that the track is not already in the list
-                            if(_context.Track.Where(x=> x.TrackID == positiondto.TrackID).Any() &&
-                                !_context.TrackActivity.Where(x=> x.TrackID == positiondto.TrackID).Any())
+                            if(_context.Track.Where(x=> x.TrackID == positiondto.TrackID).Any())
+                                //&&
+                                //!_context.TrackActivity.Where(x=> x.TrackID == positiondto.TrackID).Any())
                             {
 
                                 TrackActivity trackactivity = new TrackActivity();
