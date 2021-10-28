@@ -24,7 +24,19 @@ namespace FestivalApplication.Model
                 var listofexpiredusers = context.Authentication.Where(x => x.CurrentExpiryDate < DateTime.UtcNow).Include(y=>y.User).ToList();
                 foreach (Authentication authentication in listofexpiredusers)
                 {
+                    var userActivity = context.UserActivity.Where(x => x.User == authentication.User).First();
                     PutUserActivity(context, authentication.User.UserID);
+                    PutUserActivity(context, userActivity.User.UserID);
+                    
+                }
+                var listusernonactivity = context.UserActivity.Where(x => x.Exit==default).Include(y=>y.User).ToList();
+                foreach(UserActivity activity in listusernonactivity)
+                {
+                    if (!context.Authentication.Where(x => x.User == activity.User).Any())
+                    {
+                        PutUserActivity(context, activity.User.UserID);
+
+                    }
                 }
 
                 context.Authentication.RemoveRange(context.Authentication.Where(x => x.CurrentExpiryDate < DateTime.UtcNow));
@@ -79,7 +91,7 @@ namespace FestivalApplication.Model
             }
 
         }
-
+       
     }
 
 }
