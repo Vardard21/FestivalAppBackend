@@ -40,7 +40,7 @@ namespace FestivalApplication.Controllers
                 //open a socket and add an instance to the list of sockets
                 Stage stage = _context.Stage.Find(stageID);
                 using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                StageSocketManager.Instance.AddSocket(webSocket, stage, GetStageUsers(stage)); //Might be able to delete, because line also exists below
+                StageSocketManager.Instance.AddSocket(webSocket, stage, GetStageUsers(stage)); 
                 _logger.Log(LogLevel.Information, "WebSocket connection established");
 
                 //enter a loop for the socket
@@ -73,6 +73,10 @@ namespace FestivalApplication.Controllers
                 //Send the message back to the Frontend through the webSocket
                 await webSocket.SendAsync(new ArraySegment<byte>(AuthConfirm, 0, AuthConfirm.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
                 StageSocketManager.Instance.UpdateUserList(stage, GetStageUsers(stage));
+
+                var onloaddto = OnLoadTrack();
+                var onloadresponseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(onloaddto));
+                await webSocket.SendAsync(new ArraySegment<byte>(onloadresponseMsg, 0, onloadresponseMsg.Length), WebSocketMessageType.Text, true, CancellationToken.None);
                 //validate if auth key is an artist
                 if (_context.Authentication.Where(x => x.User.Role == "artist" && x.AuthenticationKey == authentication.AuthenticationKey).Any())
                 {
@@ -130,7 +134,7 @@ namespace FestivalApplication.Controllers
                                     if (dto.StageData != null)
                                     {
                                         //Send newly selected song to other clients
-                                        StageSocketManager.Instance.SendToTrackOtherClients(dto, webSocket, stage, GetStageUsers(stage));
+                                        StageSocketManager.Instance.SendToTrackOtherClients(dto, webSocket, stage, GetStageUsers(stage),_context);
                                     }
                                 }
                                 else if (incomingjson.ReceivedCase == "SongPause")
@@ -150,7 +154,7 @@ namespace FestivalApplication.Controllers
                                     if (dto.StageData != null)
                                     {
                                         //Send newly selected song to other clients
-                                        StageSocketManager.Instance.SendToTrackOtherClients(dto, webSocket, stage, GetStageUsers(stage));
+                                        StageSocketManager.Instance.SendToTrackOtherClients(dto, webSocket, stage, GetStageUsers(stage),_context);
                                     }
                                 }
                                 else if (incomingjson.ReceivedCase == "SongResume")
@@ -172,7 +176,7 @@ namespace FestivalApplication.Controllers
                                     if (dto.StageData != null)
                                     {
                                         //Send newly selected song to other clients
-                                        StageSocketManager.Instance.SendToTrackOtherClients(dto, webSocket, stage, GetStageUsers(stage));
+                                        StageSocketManager.Instance.SendToTrackOtherClients(dto, webSocket, stage, GetStageUsers(stage),_context);
                                     }
                                 }
 
@@ -208,20 +212,7 @@ namespace FestivalApplication.Controllers
                 }
                 else
                 {
-                    StageSocketWriterDto<PlaylistUpdateDto> dto = new StageSocketWriterDto<PlaylistUpdateDto>();
-                    int trackid = _context.TrackActivity.Where(x => x.Playing == true).FirstOrDefault().TrackID;
-                    Track track = _context.Track.Find(trackid);
-                    Response<PlaylistUpdateDto> response = new Response<PlaylistUpdateDto>();
 
-                    PlaylistUpdateDto trackdto = new PlaylistUpdateDto();
-                    trackdto.TrackName = track.TrackName;
-                    trackdto.TrackSource = track.TrackSource;
-                    response.Success = true;
-                    response.Data = trackdto;
-                    dto.StageData = response;
-                    dto.StageCase = "OnLoadTrack";
-                    var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dto));
-                    await webSocket.SendAsync(new ArraySegment<byte>(responseMsg, 0, responseMsg.Length), WebSocketMessageType.Text, true, CancellationToken.None);
                     {   //keep connection open but send nothing if not artist
                         while (!result.CloseStatus.HasValue)
                         {
@@ -412,6 +403,7 @@ namespace FestivalApplication.Controllers
                 return response;
             }
         }
+
         private Response<List<MusicListInfoDto>> GetTracks()
         {
             //create a response to send
@@ -464,7 +456,6 @@ namespace FestivalApplication.Controllers
                 return response;
             }
         }
-
 
         private Response<int> UpdateMusiclistActivity(int StageID, int MusiclistID)
         {   
@@ -604,6 +595,23 @@ namespace FestivalApplication.Controllers
                 response.ServerError();
                 return response;
             }
+        }
+
+        private StageSocketWriterDto<PlaylistUpdateDto> OnLoadTrack()
+        {
+            StageSocketWriterDto<PlaylistUpdateDto> dto = new StageSocketWriterDto<PlaylistUpdateDto>();
+            int trackid = _context.TrackActivity.Where(x => x.Playing == true).FirstOrDefault().TrackID;
+            Track track = _context.Track.Find(trackid);
+            Response<PlaylistUpdateDto> response = new Response<PlaylistUpdateDto>();
+
+            PlaylistUpdateDto trackdto = new PlaylistUpdateDto();
+            trackdto.TrackName = track.TrackName;
+            trackdto.TrackSource = track.TrackSource;
+            response.Success = true;
+            response.Data = trackdto;
+            dto.StageData = response;
+            dto.StageCase = "OnLoadTrack";
+            return dto;
         }
     }
 
