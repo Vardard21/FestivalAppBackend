@@ -181,6 +181,9 @@ namespace FestivalApplication.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int>("Length")
+                        .HasColumnType("int");
+
                     b.Property<string>("TrackName")
                         .HasColumnType("text");
 

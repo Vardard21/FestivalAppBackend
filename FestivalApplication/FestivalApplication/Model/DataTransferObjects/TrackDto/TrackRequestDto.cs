@@ -10,5 +10,7 @@ namespace FestivalApplication.Model.DataTransferObjects
         public int TrackID { get; set; }
         public string TrackName { get; set; }
         public string TrackSource { get; set; }
+
+        public Boolean Playing { get; set; }
     }
 }

@@ -56,6 +56,15 @@ namespace FestivalApplication.Controllers
                         dto.TrackName = track.TrackName;
                         dto.TrackSource = track.TrackSource;
 
+                        if (_context.TrackActivity.Where(x => x.TrackID == track.TrackID && x.Playing == true).Any())
+                        {
+                            dto.Playing = true;
+                        }
+                        else 
+                        { 
+                            dto.Playing = false;
+                        }
+
                         tracklist.Add(dto);
                     }
 
@@ -330,11 +339,11 @@ namespace FestivalApplication.Controllers
                     }
 
                     //Validate that the track is not playing
-                    //if (track.)
-                    //{
-                    //  response.InvalidOperation();
-                    //return response;
-                    //}
+                    if ( _context.TrackActivity.Where(x => x.TrackID == track.TrackID && x.Playing == true).Any())
+                    {
+                        response.InvalidOperation();
+                        return response;
+                    }
                     var activityList = _context.TrackActivity.Where(x => x.TrackID == id).ToList();
                     //Remove any interactions
                     foreach (TrackActivity activity in activityList)

@@ -135,7 +135,6 @@ namespace FestivalApplication.Controllers
                     catch
                     {
                         RemoveSocket(socket.webSocket, socket.stage, response);
-                        UpdateUserList(stage, GetStageUsers(stage, context));
                     }
                 }
             }

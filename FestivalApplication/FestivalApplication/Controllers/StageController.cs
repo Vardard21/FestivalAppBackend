@@ -74,7 +74,7 @@ namespace FestivalApplication.Controllers
                         dto.StageGenre = stage.Genre;
                         dto.StageRestriction = stage.Restriction;
 
-                        //Find the Current Song, temporarily only manually defined
+                        //Find the Current Song,
                         if (_context.MusicListActivity.Where(x => x.StageID == stage.StageID).Any())
                         {
                             int musiclistid = _context.MusicListActivity.Where(x => x.StageID == stage.StageID).First().ListID;
@@ -82,7 +82,15 @@ namespace FestivalApplication.Controllers
                             if (TestActivities.Count()>=1)
                             {
                                 int trackid = _context.TrackActivity.Where(x => x.MusicListID == musiclistid&&x.Playing==true).First().TrackID;
-                                dto.CurrentSong = _context.Track.Find(trackid).TrackName;
+                                if (_context.Track.Where(x => x.TrackID == trackid).Any())
+                                {
+                                   // dto.CurrentSong = "No Song Currently Playing";
+                                    dto.CurrentSong = _context.Track.Where(x => x.TrackID == trackid).First().TrackName;
+                                }else
+                                {
+                                    dto.CurrentSong = "No Song Currently Playing";
+                                }
+                                
                             }
                             else
                             {
