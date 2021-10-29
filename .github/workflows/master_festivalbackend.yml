@@ -53,5 +53,5 @@ jobs:
         with:
           app-name: 'FestivalBackend'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3C5DC1DCA8824ACEA1D08BEB349473F1 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_5CD9B01B5ABE4DC0973110989B5C63E3 }}
           package: .
