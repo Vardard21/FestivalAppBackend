@@ -297,7 +297,7 @@ namespace FestivalApplication.Controllers
                     }
 
                     //Validate that the person deleting the user is either the user, or an admin
-                    if (true/*_context.Authentication.Any(x => x.AuthenticationKey == Request.Headers["Authorization"] && x.User == user) | _context.Authentication.Any(x => x.AuthenticationKey == Request.Headers["Authorization"] && x.User.Role == "admin")*/)
+                    if (_context.Authentication.Any(x => x.AuthenticationKey == Request.Headers["Authorization"] && x.User == user) | _context.Authentication.Any(x => x.AuthenticationKey == Request.Headers["Authorization"] && x.User.Role == "admin"))
                     {
                         //Validate that the user is not in any stages
                         if (_context.UserActivity.Any(x => x.User == user && x.Exit == default))
