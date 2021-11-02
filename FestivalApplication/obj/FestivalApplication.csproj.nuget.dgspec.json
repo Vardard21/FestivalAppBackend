@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Yaniv\\Documents\\GitHub\\Vardard21\\FestivalAppBackend\\FestivalApplication\\FestivalApplication.csproj": {}
+    "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Yaniv\\Documents\\GitHub\\Vardard21\\FestivalAppBackend\\FestivalApplication\\FestivalApplication.csproj": {
+    "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Yaniv\\Documents\\GitHub\\Vardard21\\FestivalAppBackend\\FestivalApplication\\FestivalApplication.csproj",
+        "projectUniqueName": "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication.csproj",
         "projectName": "FestivalApplication",
-        "projectPath": "C:\\Users\\Yaniv\\Documents\\GitHub\\Vardard21\\FestivalAppBackend\\FestivalApplication\\FestivalApplication.csproj",
-        "packagesPath": "C:\\Users\\Yaniv\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Yaniv\\Documents\\GitHub\\Vardard21\\FestivalAppBackend\\FestivalApplication\\obj\\",
+        "projectPath": "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication.csproj",
+        "packagesPath": "C:\\Users\\yaniv\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Yaniv\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\yaniv\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -111,7 +111,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.402\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.401\\RuntimeIdentifierGraph.json"
         }
       }
     }

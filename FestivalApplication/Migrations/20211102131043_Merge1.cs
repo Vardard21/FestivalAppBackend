@@ -4,11 +4,7 @@ using MySql.EntityFrameworkCore.Metadata;
 
 namespace FestivalApplication.Migrations
 {
-<<<<<<< HEAD:FestivalApplication/bin/Release/net5.0/Migrations/20211102123421_MusicListActivityTrackID.cs
-    public partial class MusicListActivityTrackID : Migration
-=======
-    public partial class Delft : Migration
->>>>>>> 0f70f80164e47ae932f55c527e06c1da30490f05:FestivalApplication/Migrations/20211029135328_Delft.cs
+    public partial class Merge1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
