@@ -318,7 +318,7 @@ namespace FestivalApplication.Controllers
 
                     {
                         //Check if the state is actually different
-                        if (_context.Stage.Any(x => x.StageID == changestage.StageID && x.StageActive == changestage.StageActive))
+                        if (_context.Stage.Where(x =>( x.StageID == changestage.StageID && x.StageActive == changestage.StageActive) && (x.StageID == changestage.StageID && x.Restriction == changestage.StageRestriction)).Any()) 
                         {
                             //Stage is already at that state
                             response.InvalidData();
@@ -328,6 +328,7 @@ namespace FestivalApplication.Controllers
                         //Change the state
                         Stage stage = _context.Stage.Find(changestage.StageID);
                         stage.StageActive = changestage.StageActive;
+                        stage.Restriction = changestage.StageRestriction;
                         if (changestage.StageGenre != null)
                         {
                             stage.Genre = changestage.StageGenre;
@@ -336,14 +337,7 @@ namespace FestivalApplication.Controllers
                         {
                             stage.Genre = null;
                         }
-                        if (changestage.StageRestriction != null)
-                        {
-                            stage.Restriction = changestage.StageRestriction;
-                        }
-                        else
-                        {
-                            stage.Restriction = "none";
-                        }
+                     
                         _context.Entry(stage).State = EntityState.Modified;
 
                         //Save the changes
