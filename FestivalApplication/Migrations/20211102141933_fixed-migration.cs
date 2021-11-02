@@ -4,11 +4,7 @@ using MySql.EntityFrameworkCore.Metadata;
 
 namespace FestivalApplication.Migrations
 {
-<<<<<<< HEAD:FestivalApplication/Migrations/20211102132537_Hoi.cs
-    public partial class Hoi : Migration
-=======
-    public partial class Merge1 : Migration
->>>>>>> yaniv:FestivalApplication/Migrations/20211102131043_Merge1.cs
+    public partial class fixedmigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

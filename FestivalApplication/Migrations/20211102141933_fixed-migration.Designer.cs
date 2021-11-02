@@ -9,13 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FestivalApplication.Migrations
 {
     [DbContext(typeof(DBContext))]
-<<<<<<< HEAD:FestivalApplication/Migrations/20211102132537_Hoi.Designer.cs
-    [Migration("20211102132537_Hoi")]
-    partial class Hoi
-=======
-    [Migration("20211102131043_Merge1")]
-    partial class Merge1
->>>>>>> yaniv:FestivalApplication/Migrations/20211102131043_Merge1.Designer.cs
+    [Migration("20211102141933_fixed-migration")]
+    partial class fixedmigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
