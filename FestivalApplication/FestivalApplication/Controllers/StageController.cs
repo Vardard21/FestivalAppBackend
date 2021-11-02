@@ -36,7 +36,9 @@ namespace FestivalApplication.Controllers
                 AuthenticateKey auth = new AuthenticateKey();
                 if (auth.Authenticate(_context, Request.Headers["Authorization"]))
                 {
-                    User user = _context.Authentication.Where(x => x.AuthenticationKey == Request.Headers["Authorization"]).Include(y => y.User).First().User;
+                    User user = _context.Authentication
+                        .Where(x => x.AuthenticationKey == Request.Headers["Authorization"])
+                        .Include(y => y.User).First().User;
                     List<Stage> stagesstatus = new List<Stage>();
                     if (user.Role == "admin")
                     {
@@ -81,11 +83,11 @@ namespace FestivalApplication.Controllers
                             var TestActivities = _context.TrackActivity.Where(x => x.MusicListID == musiclistid && x.Playing == true).ToList();
                             if (TestActivities.Count()>=1)
                             {
-                                int trackid = _context.TrackActivity.Where(x => x.MusicListID == musiclistid&&x.Playing==true).First().TrackID;
+                                int trackid = _context.MusicListActivity.Where(x=> x.StageID ==stage.StageID).First().TrackID;
                                 if (_context.Track.Where(x => x.TrackID == trackid).Any())
                                 {
                                    // dto.CurrentSong = "No Song Currently Playing";
-                                    dto.CurrentSong = _context.Track.Where(x => x.TrackID == trackid).First().TrackName;
+                                    dto.CurrentSong = _context.Track.Where(x => x.TrackID== trackid).First().TrackName;
                                 }else
                                 {
                                     dto.CurrentSong = "No Song Currently Playing";
@@ -492,7 +494,7 @@ namespace FestivalApplication.Controllers
                                 var TestActivities = _context.TrackActivity.Where(x => x.MusicListID == musiclistid && x.Playing == true).ToList();
                                 if (TestActivities.Count() >= 1)
                                 {
-                                    int trackid = _context.TrackActivity.Where(x => x.MusicListID == musiclistid && x.Playing == true).First().TrackID;
+                                    int trackid = _context.MusicListActivity.Where(x => x.StageID == stage.StageID).First().TrackID;
                                     if (_context.Track.Where(x => x.TrackID == trackid).Any())
                                     {
                                         // dto.CurrentSong = "No Song Currently Playing";

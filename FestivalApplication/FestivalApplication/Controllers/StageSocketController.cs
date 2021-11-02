@@ -74,7 +74,7 @@ namespace FestivalApplication.Controllers
                 await webSocket.SendAsync(new ArraySegment<byte>(AuthConfirm, 0, AuthConfirm.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
                 StageSocketManager.Instance.UpdateUserList(stage, GetStageUsers(stage));
 
-                var onloaddto = OnLoadTrack();
+                var onloaddto = OnLoadTrack(stage.StageID);
                 var onloadresponseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(onloaddto));
                 await webSocket.SendAsync(new ArraySegment<byte>(onloadresponseMsg, 0, onloadresponseMsg.Length), WebSocketMessageType.Text, true, CancellationToken.None);
                 //validate if auth key is an artist
@@ -282,7 +282,7 @@ namespace FestivalApplication.Controllers
                             dto.Playing = true;
                             dto.PlayListID = musicid;
                             dto.TrackID = track.TrackID;
-                            UpdateMusiclistActivity(StageID, musicid);
+                            UpdateMusiclistActivity(StageID, musicid, track.TrackID);
 
                             //save trackactivity
                             _context.Entry(trackactivity).State = EntityState.Modified;
@@ -457,7 +457,7 @@ namespace FestivalApplication.Controllers
             }
         }
 
-        private Response<int> UpdateMusiclistActivity(int StageID, int MusiclistID)
+        private Response<int> UpdateMusiclistActivity(int StageID, int MusiclistID, int TrackID)
         {   
             //Create the response to be send out
             Response<int> response = new Response<int>();
@@ -487,6 +487,7 @@ namespace FestivalApplication.Controllers
                         var activelist = _context.MusicListActivity.Where(x => x.StageID == StageID && x.ListID == MusiclistID).First();
                         activelist.ListID = MusiclistID;
                         activelist.StageID = StageID;
+                        activelist.TrackID = TrackID;
                         _context.Entry(activelist).State = EntityState.Modified;
                     }
                     else
@@ -505,7 +506,7 @@ namespace FestivalApplication.Controllers
                         MusicListActivity activity = new MusicListActivity();
                         activity.ListID = MusiclistID;
                         activity.StageID = StageID;
-
+                        activity.TrackID = TrackID;
                         _context.MusicListActivity.Add(activity);
                     }
                     //Save the changes
@@ -597,10 +598,10 @@ namespace FestivalApplication.Controllers
             }
         }
 
-        private StageSocketWriterDto<PlaylistUpdateDto> OnLoadTrack()
+        private StageSocketWriterDto<PlaylistUpdateDto> OnLoadTrack(int StageID)
         {
             StageSocketWriterDto<PlaylistUpdateDto> dto = new StageSocketWriterDto<PlaylistUpdateDto>();
-            int trackid = _context.TrackActivity.Where(x => x.Playing == true).FirstOrDefault().TrackID;
+            int trackid = _context.MusicListActivity.Where(x => x.StageID ==StageID ).First().TrackID;
             Track track = _context.Track.Find(trackid);
             Response<PlaylistUpdateDto> response = new Response<PlaylistUpdateDto>();
 

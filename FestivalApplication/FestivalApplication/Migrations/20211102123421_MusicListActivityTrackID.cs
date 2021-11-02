@@ -4,7 +4,7 @@ using MySql.EntityFrameworkCore.Metadata;
 
 namespace FestivalApplication.Migrations
 {
-    public partial class PostMerge : Migration
+    public partial class MusicListActivityTrackID : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -45,8 +45,7 @@ namespace FestivalApplication.Migrations
                     TrackID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     TrackName = table.Column<string>(type: "text", nullable: true),
-                    TrackSource = table.Column<string>(type: "text", nullable: true),
-                    Length = table.Column<int>(type: "int", nullable: false)
+                    TrackSource = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -76,6 +75,7 @@ namespace FestivalApplication.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     ListID = table.Column<int>(type: "int", nullable: false),
                     StageID = table.Column<int>(type: "int", nullable: false),
+                    TrackID = table.Column<int>(type: "int", nullable: false),
                     MusicListID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>

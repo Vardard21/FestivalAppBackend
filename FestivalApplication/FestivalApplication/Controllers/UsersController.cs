@@ -309,7 +309,7 @@ namespace FestivalApplication.Controllers
                         _context.Interaction.RemoveRange(_context.Interaction.Where(x => x.UserActivity.User == user).ToList());
                         _context.Message.RemoveRange(_context.Message.Where(x => x.UserActivity.User == user).ToList());
                         _context.UserActivity.RemoveRange(_context.UserActivity.Where(x => x.User == user).ToList());
-                        _context.User.Remove(user);
+                        _context.User.RemoveRange(_context.User.Where(x => x.UserID == user.UserID).ToList());
                         if (_context.SaveChanges() > 0)
                         {
                             response.Success = true;

@@ -142,6 +142,9 @@ namespace FestivalApplication.Migrations
                     b.Property<int>("StageID")
                         .HasColumnType("int");
 
+                    b.Property<int>("TrackID")
+                        .HasColumnType("int");
+
                     b.HasKey("ID");
 
                     b.HasIndex("MusicListID");
@@ -179,9 +182,6 @@ namespace FestivalApplication.Migrations
                 {
                     b.Property<int>("TrackID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("Length")
                         .HasColumnType("int");
 
                     b.Property<string>("TrackName")

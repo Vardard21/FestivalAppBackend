@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FestivalApplication.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20211028130051_PostMerge")]
-    partial class PostMerge
+    [Migration("20211102123421_MusicListActivityTrackID")]
+    partial class MusicListActivityTrackID
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -144,6 +144,9 @@ namespace FestivalApplication.Migrations
                     b.Property<int>("StageID")
                         .HasColumnType("int");
 
+                    b.Property<int>("TrackID")
+                        .HasColumnType("int");
+
                     b.HasKey("ID");
 
                     b.HasIndex("MusicListID");
@@ -181,9 +184,6 @@ namespace FestivalApplication.Migrations
                 {
                     b.Property<int>("TrackID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("Length")
                         .HasColumnType("int");
 
                     b.Property<string>("TrackName")
