@@ -335,7 +335,7 @@ namespace FestivalApplication.Controllers
                         }
                         else
                         {
-                            stage.Genre = null;
+                            stage.Genre = _context.Stage.Where(x=>x.StageID==changestage.StageID).First().Genre;
                         }
                      
                         _context.Entry(stage).State = EntityState.Modified;

@@ -35,8 +35,9 @@ namespace FestivalApplication.Controllers
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
+                Stage stage = _context.UserActivity.Where(x => x.User.UserID==UserID && x.Exit == default).Include(y=>y.Stage).First().Stage;
                 using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                await Echo(webSocket);
+                await Echo(webSocket,stage);
             }
             else
             {
@@ -44,7 +45,7 @@ namespace FestivalApplication.Controllers
             }
         }
 
-        private async Task Echo(WebSocket webSocket)
+        private async Task Echo(WebSocket webSocket,Stage stage)
         {
             //Create a buffer in which to store the incoming bytes
             var buffer = new byte[1024 * 4];
@@ -63,7 +64,7 @@ namespace FestivalApplication.Controllers
 
                 StageWebSocket socket = new StageWebSocket();
                 socket.webSocket = webSocket;
-                socket.stage = _context.Stage.Find(startdto.StageID);
+                socket.stage = stage;
                 MessageSocketManager.Instance.AddSocket(socket);
                 //Enter a while loop for as long as the connection is not closed
                 while (!result.CloseStatus.HasValue)
@@ -100,7 +101,7 @@ namespace FestivalApplication.Controllers
                                 }
                                 if (response.Message.Success)
                                 {
-                                    MessageSocketManager.Instance.SendToMessageOtherClients(response.Message.Data, webSocket);
+                                    MessageSocketManager.Instance.SendToMessageOtherClients(response.Message.Data, socket.webSocket,socket.stage);
                                 }
                             }
                             catch (Exception exp)
