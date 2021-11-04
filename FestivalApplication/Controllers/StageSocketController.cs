@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -252,7 +253,23 @@ namespace FestivalApplication.Controllers
                 }
 
                 //checks which tracks are in the musiclist
-                var playlist = _context.TrackActivity.Where(x => x.MusicListID == musicid).ToList();
+                var playlist = _context.TrackActivity.ToList();
+                var activesongs = _context.MusicListActivity.ToList();
+
+                foreach (MusicListActivity listActivity in activesongs)
+                {
+
+                    if (_context.TrackActivity.Where(x => x.TrackID == listActivity.TrackID && x.MusicListID == listActivity.ListID).Any())
+                    { 
+                    playlist.Remove(_context.TrackActivity.Where(x => x.TrackID == listActivity.TrackID && x.MusicListID == listActivity.ListID).First());
+                    }
+                    else
+                    { 
+                    _context.MusicListActivity.Remove(_context.MusicListActivity.Where(x => x.ID == listActivity.ID).First());
+                    }
+                }
+                var activetrack = _context.MusicListActivity.Where(x => x.StageID == StageID).First();
+                playlist.Add(_context.TrackActivity.Where(x => x.TrackID == activetrack.TrackID && x.MusicListID == activetrack.ListID).First());
 
                 //turn all playing to false
                 foreach (TrackActivity trackactivity in playlist)
@@ -340,7 +357,15 @@ namespace FestivalApplication.Controllers
                 }
 
                 //checks which tracks are in the musiclist
-                var playlist = _context.TrackActivity.Where(x => x.MusicListID == musicid).ToList();
+                var playlist = _context.TrackActivity.ToList();
+                var activesongs = _context.MusicListActivity.ToList();
+
+                foreach(MusicListActivity listActivity in activesongs)
+                {
+                    playlist.Remove(_context.TrackActivity.Where(x => x.TrackID == listActivity.TrackID && x.MusicListID == listActivity.ListID).First());
+                }
+                var activetrack = _context.MusicListActivity.Where(x => x.StageID == StageID).First();
+                playlist.Add(_context.TrackActivity.Where(x => x.TrackID == activetrack.TrackID && x.MusicListID == activetrack.ListID).First());
 
                 //turn all playing to false
                 foreach (TrackActivity trackactivity in playlist)
@@ -350,6 +375,7 @@ namespace FestivalApplication.Controllers
                         _context.Entry(trackactivity).State = EntityState.Modified;
                     }
                 }
+
 
                 //find selected track
                 var selectedtrack = _context.TrackActivity.Where(x => x.TrackID == id && x.MusicListID == musicid).ToList();

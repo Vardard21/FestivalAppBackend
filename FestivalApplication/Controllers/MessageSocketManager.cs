@@ -54,16 +54,16 @@ namespace FestivalApplication.Controllers
             }
         }
 
-        public async void SendToMessageOtherClients(MessageSendDto Message, WebSocket ParentSocket)
+        public async void SendToMessageOtherClients(MessageSendDto Message, WebSocket ParentSocket,Stage stage)
         {
+            var StageActiveSockets = ActiveSockets.Where(x => x.stage.StageID == stage.StageID).ToList();
             SocketTypeWriter<MessageSendDto> SocketMessage = new SocketTypeWriter<MessageSendDto>();
             SocketMessage.MessageType = "IncomingMessage";
             SocketMessage.Message = Message;
             var responseMsg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(SocketMessage));
-            Stage stage = ActiveSockets.Where(x => x.webSocket == ParentSocket).FirstOrDefault().stage;
-            foreach (StageWebSocket socket in ActiveSockets)
+            foreach (StageWebSocket socket in StageActiveSockets)
             {
-                if(socket.webSocket.State == WebSocketState.Open && socket.webSocket != ParentSocket && socket.stage == stage)
+                if(socket.webSocket.State == WebSocketState.Open && socket.webSocket != ParentSocket)
                 {
                     try
                     {
