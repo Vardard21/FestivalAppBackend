@@ -348,6 +348,7 @@ namespace FestivalApplication.Controllers
             else
             {
                 response.ServerError();
+                response.Data = "Failed to save change";
                 return response;
             }
         }
