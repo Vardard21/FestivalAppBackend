@@ -10347,19 +10347,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\yaniv\\.nuget\\packages\\": {}
+    "C:\\Users\\jwijckma\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication.csproj",
+      "projectUniqueName": "C:\\Users\\jwijckma\\Documents\\Repo\\Back-End-Festival\\FestivalApplication\\FestivalApplication.csproj",
       "projectName": "FestivalApplication",
-      "projectPath": "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\FestivalApplication.csproj",
-      "packagesPath": "C:\\Users\\yaniv\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\yaniv\\source\\repos\\FestivalAppBackend\\FestivalApplication\\obj\\",
+      "projectPath": "C:\\Users\\jwijckma\\Documents\\Repo\\Back-End-Festival\\FestivalApplication\\FestivalApplication.csproj",
+      "packagesPath": "C:\\Users\\jwijckma\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\jwijckma\\Documents\\Repo\\Back-End-Festival\\FestivalApplication\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\yaniv\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\jwijckma\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -10456,7 +10456,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.401\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.402\\RuntimeIdentifierGraph.json"
       }
     }
   }
